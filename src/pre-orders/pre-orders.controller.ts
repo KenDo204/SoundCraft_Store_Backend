@@ -1,0 +1,34 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { PreOrdersService } from './pre-orders.service';
+import { CreatePreOrderDto } from './dto/create-pre-order.dto';
+import { UpdatePreOrderDto } from './dto/update-pre-order.dto';
+
+@Controller('pre-orders')
+export class PreOrdersController {
+  constructor(private readonly preOrdersService: PreOrdersService) {}
+
+  @Post()
+  create(@Body() createPreOrderDto: CreatePreOrderDto) {
+    return this.preOrdersService.create(createPreOrderDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.preOrdersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.preOrdersService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updatePreOrderDto: UpdatePreOrderDto) {
+    return this.preOrdersService.update(+id, updatePreOrderDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.preOrdersService.remove(+id);
+  }
+}
