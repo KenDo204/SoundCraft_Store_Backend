@@ -16,10 +16,14 @@ export class CreateBrandDto {
   @MaxLength(100)
   name: string;
 
-  @ApiProperty({ required: false })
-  @IsString()
+  @ApiProperty({ 
+    type: 'string', 
+    format: 'binary', 
+    required: false, 
+    description: 'File ảnh logo thương hiệu (chỉ nhận file ảnh)' 
+  })
   @IsOptional()
-  brand_image?: string;
+  file?: any;
 
   @ApiProperty({ default: true, required: false })
   @IsBoolean()
