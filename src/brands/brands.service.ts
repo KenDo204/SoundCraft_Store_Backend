@@ -60,12 +60,15 @@ export class BrandsService {
       imageUrl = uploadResult.secure_url; 
     }
 
+    const slug = this.generateSlug(createBrandDto.name);
+
     // 3. Tạo và lưu Entity
     const newBrand = this.brandRepository.create({
       ...createBrandDto,
       name,
       brand_code: brandCode,
       brand_image: imageUrl,
+      slug,
     });
 
     return await this.brandRepository.save(newBrand);
@@ -121,6 +124,10 @@ export class BrandsService {
       imageUrl = newImageUrl;
     }
 
+    if (updateBrandDto.name && updateBrandDto.name !== brand.name) {
+      brand.slug = this.generateSlug(updateBrandDto.name);
+    }
+
     // 3. Cập nhật dữ liệu
     const updatedBrand = this.brandRepository.merge(brand, {
       ...updateBrandDto,
@@ -151,7 +158,32 @@ export class BrandsService {
       );
     }
 
+    // Xóa ảnh trên Cloudinary trước
+    if (brand.brand_image) {
+      const publicId = this.cloudinaryService.extractPublicId(brand.brand_image);
+      if (publicId) {
+        try {
+          await this.cloudinaryService.deleteImage(publicId);
+        } catch (error) {
+          console.error(`Lỗi khi xóa ảnh trên Cloudinary: ${publicId}`, error);
+        }
+      }
+    }
+
     // Nếu vượt qua hết thì tiến hành xóa
     await this.brandRepository.remove(brand);
+  }
+
+   // Hàm xịn xò chuyển "Đàn Guitar Classic" thành "dan-guitar-classic"
+  private generateSlug(text: string): string {
+    return text.toString().toLowerCase()
+      .normalize('NFD') // Tách dấu ra khỏi chữ
+      .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D') // Chữ Đ
+      .replace(/\s+/g, '-') // Đổi khoảng trắng thành gạch ngang
+      .replace(/[^\w\-]+/g, '') // Xóa các ký tự đặc biệt
+      .replace(/\-\-+/g, '-') // Xóa gạch ngang thừa
+      .replace(/^-+/, '') // Xóa gạch ở đầu
+      .replace(/-+$/, ''); // Xóa gạch ở cuối
   }
 }

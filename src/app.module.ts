@@ -22,6 +22,7 @@ import { RevenuesModule } from './revenues/revenues.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { TokenModule } from './token/token.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -101,6 +102,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     AddressesModule,
 
     TokenModule,
+
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

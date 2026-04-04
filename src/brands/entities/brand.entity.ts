@@ -23,6 +23,14 @@ export class Brand {
   @Column({ length: 100 })
   name: string;
 
+  @ApiProperty({ example: 'fender-guitars', description: 'Đường dẫn chuẩn SEO' })
+  @Column({ type: 'varchar', length: 120, nullable: true, unique: true })
+  slug: string;
+
+  @ApiProperty({ example: 'Fender là thương hiệu nhạc cụ hàng đầu thế giới...', nullable: true })
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
   @ApiProperty({ example: 'soundcraft/brands/yamaha_logo.png' })
   @Column({ type: 'text', nullable: true })
   brand_image: string | null;

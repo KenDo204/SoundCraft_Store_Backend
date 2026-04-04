@@ -25,6 +25,11 @@ export class CreateBrandDto {
   @IsOptional()
   file?: any;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @ApiProperty({ default: true, required: false })
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true || value === 1 || value === '1')
