@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Category } from '@/categories/entities/category.entity';
+import { Brand } from '@/brands/entities/brand.entity';
 import { ProductVariant } from './product-variant.entity';
 import { ProductImage } from './product-image.entity';
 import { CartItem } from '@/carts/entities/cart-item.entity';
@@ -35,9 +35,9 @@ export class Product {
   @Column({ default: true })
   is_stock: boolean;
 
-  @ManyToOne(() => Category, (category) => category.products, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
+  @ManyToOne(() => Brand, (brand) => brand.products, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'brand_id' })
+  brand: Brand;
 
   @ApiProperty()
   @CreateDateColumn()

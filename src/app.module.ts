@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AuthModule } from './auth/auth.module';
-import { CategoriesModule } from './categories/categories.module';
+import { BrandsModule } from './brands/brands.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { UsersModule } from './users/users.module';
@@ -45,7 +45,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         database: configService.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
         // Ở chế độ dev, synchronize=true giúp tự tạo bảng. Khi bảo vệ xong đem lên thật thì nên tắt.
-        synchronize: true, 
+        synchronize: true,
       }),
     }),
 
@@ -72,7 +72,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
     AuthModule,
 
-    CategoriesModule,
+    BrandsModule,
 
     ProductsModule,
 
@@ -105,4 +105,4 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
