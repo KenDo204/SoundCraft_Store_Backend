@@ -43,4 +43,7 @@ export class Address {
   @ManyToOne(() => User, (user) => user.user_id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ type: 'varchar', length: 255, name: 'address_note', nullable: true })
+  address_note?: string;
 }
