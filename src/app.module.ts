@@ -24,6 +24,7 @@ import { TokenModule } from './token/token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CategoriesModule } from './categories/categories.module';
 import { AdminModule } from './admin/admin.module';
+import { GhnModule } from './ghn/ghn.module';
 
 @Module({
   imports: [
@@ -108,6 +109,8 @@ import { AdminModule } from './admin/admin.module';
     CategoriesModule,
 
     AdminModule,
+
+    GhnModule,
   ],
   controllers: [AppController],
   providers: [AppService],
