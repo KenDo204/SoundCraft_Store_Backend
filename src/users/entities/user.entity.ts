@@ -5,6 +5,7 @@ import { Address } from '@/addresses/entities/address.entity';
 import { Notification } from '@/notifications/entities/notification.entity';
 import { Cart } from '@/carts/entities/cart.entity';
 import { UserRole } from '@/users/enums/user-role.enum';
+import { Gender } from '@/users/enums/user-roles.enum';
 
 @Entity('users')
 export class User {
@@ -34,14 +35,28 @@ export class User {
 
   @ApiProperty({ example: 'ROLE_CUSTOMER', description: 'Vai trò: ROLE_ADMIN, ROLE_SELLER, ROLE_CUSTOMER' })
   @Column({ type: 'varchar', length: 20, default: UserRole.CUSTOMER, })
-  role: string;
+  role: UserRole;
 
+  @Column({ type: 'date', nullable: true })
+  dob: Date;
+
+  @Column({ type: 'enum', enum: Gender, nullable: true })
+  gender: Gender;
+  
   @ApiProperty({ example: true })
   @Column({ default: true })
   is_active: boolean;
 
   @CreateDateColumn()
   created_at: Date;
+
+  // Lưu mã OTP quên mật khẩu (Nên để select: false để bảo mật)
+  @Column({ type: 'varchar', length: 10, nullable: true, select: false })
+  resetPasswordToken: string | null;
+
+  // Thời gian mã OTP hết hạn
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires: Date | null;
 
   @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];

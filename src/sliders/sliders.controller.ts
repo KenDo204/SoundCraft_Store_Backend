@@ -11,7 +11,7 @@ import { UpdateSliderDto } from './dto/update-slider.dto';
 @ApiTags('Sliders - Quản lý Banner Quảng Cáo')
 @Controller('sliders')
 export class SlidersController {
-  constructor(private readonly slidersService: SlidersService) {}
+  constructor(private readonly slidersService: SlidersService) { }
 
   // ==========================================
   // PUBLIC API 
@@ -20,7 +20,7 @@ export class SlidersController {
   @ApiOperation({ summary: 'Lấy danh sách Banner đang hoạt động (Cho Khách hàng)' })
   async getActiveSliders() {
     const sliders = await this.slidersService.getActiveSliders();
-    return { statusCode: 200, message: 'Lấy danh sách slider thành công', data: sliders };
+    return { status: 200, message: 'Lấy danh sách slider thành công', data: sliders };
   }
 
   // ==========================================
@@ -33,7 +33,7 @@ export class SlidersController {
   @ApiOperation({ summary: 'Lấy tất cả Banner (Cho Admin)' })
   async getAllSlidersForAdmin() {
     const sliders = await this.slidersService.getAllSlidersForAdmin();
-    return { statusCode: 200, message: 'Lấy danh sách slider thành công', data: sliders };
+    return { status: 200, message: 'Lấy danh sách slider thành công', data: sliders };
   }
 
   @Get(':id')
@@ -42,7 +42,7 @@ export class SlidersController {
   @ApiBearerAuth('JWT-auth')
   async getSliderById(@Param('id') id: string) {
     const slider = await this.slidersService.getSliderById(+id);
-    return { statusCode: 200, message: 'Lấy thông tin slider thành công', data: slider };
+    return { status: 200, message: 'Lấy thông tin slider thành công', data: slider };
   }
 
   @Post()
@@ -57,7 +57,7 @@ export class SlidersController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const slider = await this.slidersService.create(createSliderDto, file);
-    return { statusCode: 201, message: 'Tạo slider thành công', data: slider };
+    return { status: 201, message: 'Tạo slider thành công', data: slider };
   }
 
   @Put(':id')
@@ -73,7 +73,7 @@ export class SlidersController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const slider = await this.slidersService.update(+id, updateSliderDto, file);
-    return { statusCode: 200, message: 'Cập nhật slider thành công', data: slider };
+    return { status: 200, message: 'Cập nhật slider thành công', data: slider };
   }
 
   @Patch(':id/toggle') // Giống hệt @PatchMapping("/{id}/toggle") bên Java
@@ -83,7 +83,7 @@ export class SlidersController {
   @ApiOperation({ summary: 'Đổi trạng thái Bật/Tắt Banner' })
   async toggleSliderStatus(@Param('id') id: string) {
     const slider = await this.slidersService.toggleStatus(+id);
-    return { statusCode: 200, message: 'Đổi trạng thái slider thành công', data: slider };
+    return { status: 200, message: 'Đổi trạng thái slider thành công', data: slider };
   }
 
   @Delete(':id')
@@ -93,6 +93,6 @@ export class SlidersController {
   @ApiOperation({ summary: 'Xóa Banner' })
   async deleteSlider(@Param('id') id: string) {
     await this.slidersService.remove(+id);
-    return { statusCode: 200, message: 'Xóa slider thành công' };
+    return { status: 200, message: 'Xóa slider thành công' };
   }
 }

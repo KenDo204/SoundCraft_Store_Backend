@@ -54,7 +54,7 @@ export class CategoriesService {
   // ADMIN APIs
   // ==========================================
 
-  // TINH HOA BE 2: Lấy danh sách có Filter cho Admin
+  // Lấy danh sách có Filter cho Admin
   async getAllForAdmin(keyword?: string, parent_id?: number) {
 
     console.log("👉 Keyword từ Postman gửi xuống:", keyword);

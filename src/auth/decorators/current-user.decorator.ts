@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-// Lấy toàn bộ thông tin User từ Token (đã được Passport decode và gán vào req.user)
+// Lấy toàn bộ thông tin User
 export const CurrentUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
@@ -8,10 +8,10 @@ export const CurrentUser = createParamDecorator(
   },
 );
 
-// Lấy riêng UserId (Thay cho SecurityUtils.getCurrentUserId())
+// Lấy riêng UserId (ĐÃ SỬA LẠI ĐƯỜNG DẪN)
 export const CurrentUserId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    return request.user?.user?.id; // Lấy từ claim "user.id" mà mình đã tạo ở bước 1
+    return request.user?.id; // <-- Đổi từ request.user?.user?.id thành request.user?.id
   },
 );

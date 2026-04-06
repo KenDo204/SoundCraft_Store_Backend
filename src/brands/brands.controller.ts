@@ -11,7 +11,7 @@ import { Roles } from '@/auth/decorators/roles.decorator';
 @ApiTags('Brands - Quản lý thương hiệu')
 @Controller('brands')
 export class BrandsController {
-  constructor(private readonly brandsService: BrandsService) {}
+  constructor(private readonly brandsService: BrandsService) { }
 
   // ==========================================
   // PUBLIC APIs (Khách hàng xem)
@@ -21,14 +21,14 @@ export class BrandsController {
   @ApiOperation({ summary: 'Lấy danh sách tất cả thương hiệu' })
   async getAllBrands() {
     const brands = await this.brandsService.findAll();
-    return { statusCode: 200, message: 'Lấy danh sách thương hiệu thành công', data: brands };
+    return { status: 200, message: 'Lấy danh sách thương hiệu thành công', data: brands };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết một thương hiệu theo ID' })
   async getBrandById(@Param('id') id: string) {
     const brand = await this.brandsService.findOne(+id);
-    return { statusCode: 200, message: 'Lấy thông tin thương hiệu thành công', data: brand };
+    return { status: 200, message: 'Lấy thông tin thương hiệu thành công', data: brand };
   }
 
   // ==========================================
@@ -43,11 +43,11 @@ export class BrandsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async createBrand(
-    @Body() createBrandDto: CreateBrandDto, 
+    @Body() createBrandDto: CreateBrandDto,
     @UploadedFile() file: Express.Multer.File
   ) {
     const brand = await this.brandsService.create(createBrandDto, file);
-    return { statusCode: 201, message: 'Tạo thương hiệu thành công', data: brand };
+    return { status: 201, message: 'Tạo thương hiệu thành công', data: brand };
   }
 
   @Patch(':id')
@@ -58,12 +58,12 @@ export class BrandsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async updateBrand(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateBrandDto: UpdateBrandDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
     const brand = await this.brandsService.update(+id, updateBrandDto, file);
-    return { statusCode: 200, message: 'Cập nhật thương hiệu thành công', data: brand };
+    return { status: 200, message: 'Cập nhật thương hiệu thành công', data: brand };
   }
 
   @Delete(':id')
@@ -74,6 +74,6 @@ export class BrandsController {
   async deleteBrand(@Param('id') id: string) {
     await this.brandsService.remove(+id);
     // Xóa thành công không cần trả data
-    return { statusCode: 200, message: 'Xóa thương hiệu thành công' }; 
+    return { status: 200, message: 'Xóa thương hiệu thành công' };
   }
 }

@@ -23,6 +23,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { TokenModule } from './token/token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CategoriesModule } from './categories/categories.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { CategoriesModule } from './categories/categories.module';
       useFactory: (configService: ConfigService) => ({
         transport: {
           host: configService.get('MAIL_HOST'),
+          port: 587,
           secure: false,
           auth: {
             user: configService.get('MAIL_USER'),
@@ -64,7 +66,7 @@ import { CategoriesModule } from './categories/categories.module';
           },
         },
         defaults: {
-          from: configService.get('MAIL_FROM'),
+          from: `"Hệ thống Nhạc Cụ" <${configService.get('MAIL_FROM')}>`,
         },
       }),
     }),
@@ -104,6 +106,8 @@ import { CategoriesModule } from './categories/categories.module';
     TokenModule,
 
     CategoriesModule,
+
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

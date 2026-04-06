@@ -12,7 +12,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 @ApiTags('Categories - Quản lý Danh mục')
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private readonly categoriesService: CategoriesService) { }
 
   // ==========================================
   // PUBLIC APIs (Khách hàng)
@@ -23,7 +23,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Lấy cây Danh mục (Phục vụ Menu Khách hàng)' })
   async getCategoryTree() {
     const tree = await this.categoriesService.getCategoryTree();
-    return { statusCode: 200, message: 'Lấy cây danh mục thành công', data: tree };
+    return { status: 200, message: 'Lấy cây danh mục thành công', data: tree };
   }
 
   // ==========================================
@@ -43,14 +43,14 @@ export class CategoriesController {
     @Query('parent_id') parent_id?: number,
   ) {
     const categories = await this.categoriesService.getAllForAdmin(keyword, parent_id);
-    return { statusCode: 200, message: 'Lấy danh sách danh mục thành công', data: categories };
+    return { status: 200, message: 'Lấy danh sách danh mục thành công', data: categories };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết 1 danh mục' })
   async getCategoryById(@Param('id') id: string) {
     const category = await this.categoriesService.getCategoryById(+id);
-    return { statusCode: 200, message: 'Lấy chi tiết danh mục thành công', data: category };
+    return { status: 200, message: 'Lấy chi tiết danh mục thành công', data: category };
   }
 
   @Post()
@@ -65,7 +65,7 @@ export class CategoriesController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const category = await this.categoriesService.create(createCategoryDto, file);
-    return { statusCode: 201, message: 'Tạo danh mục thành công', data: category };
+    return { status: 201, message: 'Tạo danh mục thành công', data: category };
   }
 
   @Put(':id')
@@ -81,7 +81,7 @@ export class CategoriesController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const category = await this.categoriesService.update(+id, updateCategoryDto, file);
-    return { statusCode: 200, message: 'Cập nhật danh mục thành công', data: category };
+    return { status: 200, message: 'Cập nhật danh mục thành công', data: category };
   }
 
   // Tinh hoa BE 2: Tách riêng nút Bật/Tắt (Toggle) cho mượt
@@ -92,7 +92,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Đổi trạng thái Bật/Tắt Danh mục' })
   async toggleStatus(@Param('id') id: string) {
     const category = await this.categoriesService.toggleStatus(+id);
-    return { statusCode: 200, message: 'Đổi trạng thái danh mục thành công', data: category };
+    return { status: 200, message: 'Đổi trạng thái danh mục thành công', data: category };
   }
 
   @Delete(':id')
@@ -102,6 +102,6 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Xóa Danh mục (Chỉ xóa nếu không có con)' })
   async remove(@Param('id') id: string) {
     await this.categoriesService.remove(+id);
-    return { statusCode: 200, message: 'Xóa danh mục thành công' };
+    return { status: 200, message: 'Xóa danh mục thành công' };
   }
 }
