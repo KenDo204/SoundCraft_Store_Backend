@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Address } from '@/addresses/entities/address.entity';
@@ -14,6 +14,7 @@ export class User {
   user_id: number;
 
   @ApiProperty({ example: 'Nguyễn Văn A', description: 'Họ và tên' })
+  @Index()
   @Column({ length: 100, default: 'Khách hàng' })
   full_name: string;
 
@@ -34,6 +35,7 @@ export class User {
   avatar: string;
 
   @ApiProperty({ example: 'ROLE_CUSTOMER', description: 'Vai trò: ROLE_ADMIN, ROLE_SELLER, ROLE_CUSTOMER' })
+  @Index()
   @Column({ type: 'varchar', length: 20, default: UserRole.CUSTOMER, })
   role: UserRole;
 

@@ -140,18 +140,19 @@ export class BrandsService {
   // XÓA
   // ==========================================
   async remove(id: number) {
-    // Lấy brand kèm theo relations products để kiểm tra số lượng
-    const brand = await this.brandRepository.findOne({
-      where: { brand_id: id },
-      relations: ['products'], 
-    });
-
+    // 1. Kiểm tra tồn tại
+    const brand = await this.brandRepository.findOne({ where: { brand_id: id } });
     if (!brand) {
       throw new NotFoundException(`Không tìm thấy thương hiệu với ID: ${id}`);
     }
 
-    // Validation có sản phẩm đang sử dụng không (Giống CategoryInUseException bên Java)
-    const productCount = brand.products?.length || 0;
+    // 2. Tối ưu: Chỉ đếm số lượng sản phẩm thay vì load cả list products (Tránh N+1/Memory leak)
+    // Giả sử ProductRepository được tiêm vào hoặc dùng manager
+    const productCount = await this.brandRepository.manager
+      .createQueryBuilder('products', 'p')
+      .where('p.brand_id = :id', { id })
+      .getCount();
+
     if (productCount > 0) {
       throw new BadRequestException(
         `Không thể xóa! Thương hiệu '${brand.name}' đang có ${productCount} sản phẩm.`

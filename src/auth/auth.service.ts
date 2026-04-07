@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '@/users/users.service';
-import { TokenService } from '@/token/token.service'; // Bạn sẽ tạo service quản lý bảng tokens
+import { TokenService } from './token.service'; // Bạn sẽ tạo service quản lý bảng tokens
 import { SocialAccountsService } from './social-accounts.service';
 import { RegisterDto, LoginDto, LoginResponseDto, LoginWithGoogleDto } from './dto/auth.dto';
 import { Response } from 'express';

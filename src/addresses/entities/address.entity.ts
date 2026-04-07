@@ -1,8 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 
 @Entity('addresses')
+@Index('idx_address_user_id', ['user'])
+@Index('idx_address_user_default', ['user', 'is_default'])
 export class Address {
   @ApiProperty({ example: 1 })
   @PrimaryGeneratedColumn({ type: 'bigint' })

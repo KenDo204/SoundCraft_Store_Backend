@@ -5,9 +5,9 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport'; // <--- 1. IMPORT THÊM DÒNG NÀY
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Token } from '@/token/entities/token.entity';
+import { Token } from './entities/token.entity';
 import { SocialAccount } from '@/users/entities/social-account.entity';
-import { TokenService } from '@/token/token.service';
+import { TokenService } from './token.service';
 import { SocialAccountsService } from './social-accounts.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CartsModule } from 'src/carts/carts.module';

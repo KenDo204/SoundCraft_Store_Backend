@@ -4,7 +4,8 @@ import {
   Column, 
   OneToMany, 
   CreateDateColumn, 
-  UpdateDateColumn 
+  UpdateDateColumn,
+  Index
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from '@/products/entities/product.entity';
@@ -20,6 +21,7 @@ export class Brand {
   brand_code: string;
 
   @ApiProperty({ example: 'Đàn Guitar', description: 'Tên danh mục' })
+  @Index()
   @Column({ length: 100 })
   name: string;
 
@@ -36,6 +38,7 @@ export class Brand {
   brand_image: string | null;
 
   @ApiProperty({ example: true })
+  @Index()
   @Column({ default: true })
   is_active: boolean;
 

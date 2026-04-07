@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Brand } from 'src/brands/entities/brand.entity';
 
@@ -25,6 +25,7 @@ export class Slider {
   target_url: string;
 
   @ApiProperty({ example: 3, description: 'ID của thương hiệu (để lấy logo)' })
+  @Index()
   @Column({ type: 'bigint', nullable: true })
   brand_id: number;
 
@@ -33,6 +34,7 @@ export class Slider {
   brand: Brand;
 
   @ApiProperty({ example: true })
+  @Index()
   @Column({ default: true })
   is_active: boolean;
 

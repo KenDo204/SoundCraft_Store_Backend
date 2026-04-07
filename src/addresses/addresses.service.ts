@@ -41,6 +41,13 @@ export class AddressService {
     const address = await this.addressRepository.findOne({ 
       where: { address_id: addressId },
       relations: ['user'],
+      select: {
+        address_id: true,
+        is_default: true,
+        user: {
+            user_id: true
+        }
+      }
     });
 
     if (!address) throw new NotFoundException('Không tìm thấy địa chỉ');

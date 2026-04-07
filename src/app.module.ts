@@ -20,11 +20,11 @@ import { WishlistsModule } from './wishlists/wishlists.module';
 import { PreOrdersModule } from './pre-orders/pre-orders.module';
 import { RevenuesModule } from './revenues/revenues.module';
 import { AddressesModule } from './addresses/addresses.module';
-import { TokenModule } from './token/token.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CategoriesModule } from './categories/categories.module';
 import { AdminModule } from './admin/admin.module';
 import { GhnModule } from './ghn/ghn.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -46,6 +46,10 @@ import { GhnModule } from './ghn/ghn.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
+        extra: {
+          max: 50, // Tăng Pool Size lên (tùy vào cấu hình RAM/CPU của server)
+          connectionTimeoutMillis: 5000, // Tự động ngắt kết nối nếu treo quá 5 giây
+        },
         autoLoadEntities: true,
         // Ở chế độ dev, synchronize=true giúp tự tạo bảng. Khi bảo vệ xong đem lên thật thì nên tắt.
         synchronize: true,
@@ -104,13 +108,13 @@ import { GhnModule } from './ghn/ghn.module';
 
     AddressesModule,
 
-    TokenModule,
-
     CategoriesModule,
 
     AdminModule,
 
     GhnModule,
+
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

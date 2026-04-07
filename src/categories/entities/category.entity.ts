@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('categories')
@@ -8,6 +8,7 @@ export class Category {
   category_id: number;
 
   @ApiProperty({ example: 'Guitar & Bass', description: 'Tên danh mục hiển thị trên Menu' })
+  @Index()
   @Column({ length: 100 })
   name: string;
 
@@ -36,6 +37,7 @@ export class Category {
   level: number;
 
   @ApiProperty({ example: true, default: true })
+  @Index()
   @Column({ default: true })
   is_active: boolean;
 
@@ -47,6 +49,7 @@ export class Category {
     nullable: true, 
     description: 'ID của danh mục cha (Nếu là danh mục lớn nhất Level 1 thì để null)' 
   })
+  @Index()
   @Column({ type: 'bigint', nullable: true })
   parent_id: number | null;
 

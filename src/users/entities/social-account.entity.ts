@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 
 @Entity('social_accounts')
-@Unique(['provider', 'provider_id']) // Ràng buộc UNIQUE(provider, provider_id)
+@Unique(['provider', 'provider_id']) 
+@Index(['provider', 'provider_id'])
 export class SocialAccount {
   @ApiProperty({ example: 1 })
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -27,5 +28,6 @@ export class SocialAccount {
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
+  @Index()
   user: User;
 }

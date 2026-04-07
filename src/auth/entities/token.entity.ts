@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 
@@ -9,6 +9,7 @@ export class Token {
   token_id: number;
 
   @ApiProperty({ description: 'Chuỗi Refresh Token' })
+  @Index()
   @Column({ length: 500 })
   refresh_token: string;
 

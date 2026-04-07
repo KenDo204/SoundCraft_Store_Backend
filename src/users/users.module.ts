@@ -6,7 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CartsModule } from '@/carts/carts.module';
 import { RevenuesModule } from '@/revenues/revenues.module';
-import { TokenModule } from '@/token/token.module';
 import { AddressesModule } from '@/addresses/addresses.module';
 
 @Module({
@@ -14,7 +13,6 @@ import { AddressesModule } from '@/addresses/addresses.module';
     TypeOrmModule.forFeature([User]), 
     CartsModule,
     RevenuesModule,
-    TokenModule,
     AddressesModule
   ],
   controllers: [UsersController],

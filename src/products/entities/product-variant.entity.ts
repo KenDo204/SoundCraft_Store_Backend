@@ -20,6 +20,10 @@ export class ProductVariant {
   @Column({ type: 'numeric', precision: 15, scale: 2, default: 0 })
   price: number;
 
+  @ApiProperty({ example: 10, description: 'Số lượng tồn kho' })
+  @Column({ type: 'int', default: 0 })
+  stock_quantity: number;
+
   @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product: Product;
