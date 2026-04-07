@@ -1,0 +1,7 @@
+export enum UserActionType {
+  VIEW_PRODUCT = 'VIEW_PRODUCT',
+  ADD_TO_CART = 'ADD_TO_CART',
+  PURCHASE = 'PURCHASE',
+  ADD_TO_WISHLIST = 'ADD_TO_WISHLIST',
+  SEARCH = 'SEARCH',
+}

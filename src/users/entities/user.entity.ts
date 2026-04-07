@@ -5,7 +5,7 @@ import { Address } from '@/addresses/entities/address.entity';
 import { Notification } from '@/notifications/entities/notification.entity';
 import { Cart } from '@/carts/entities/cart.entity';
 import { UserRole } from '@/users/enums/user-role.enum';
-import { Gender } from '@/users/enums/user-roles.enum';
+import { Gender } from '@/users/enums/user-gender.enum';
 
 @Entity('users')
 export class User {
@@ -44,7 +44,7 @@ export class User {
 
   @Column({ type: 'enum', enum: Gender, nullable: true })
   gender: Gender;
-  
+
   @ApiProperty({ example: true })
   @Column({ default: true })
   is_active: boolean;

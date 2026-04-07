@@ -25,6 +25,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { AdminModule } from './admin/admin.module';
 import { GhnModule } from './ghn/ghn.module';
 import { SearchModule } from './search/search.module';
+import { RecommendationModule } from './recommendation/recommendation.module';
+import { HomePageModule } from './home-page/home-page.module';
+import { TrackingModule } from './tracking/tracking.module';
 
 @Module({
   imports: [
@@ -115,6 +118,12 @@ import { SearchModule } from './search/search.module';
     GhnModule,
 
     SearchModule,
+
+    RecommendationModule,
+
+    HomePageModule,
+
+    TrackingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
