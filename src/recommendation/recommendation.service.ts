@@ -26,7 +26,6 @@ export class RecommendationService {
     return {
       productId: Number(product.product_id),
       productName: product.product_name,
-      productCode: product.product_code,
       thumbnailUrl,
       minPrice,
       isStock: product.is_stock,

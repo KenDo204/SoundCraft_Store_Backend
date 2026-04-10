@@ -6,11 +6,13 @@ import { Product } from './entities/product.entity';
 import { Brand } from '@/brands/entities/brand.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { ProductImage } from './entities/product-image.entity';
+import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     // 1. Đăng ký cả Product và Brand vào đây
     TypeOrmModule.forFeature([Product, Brand, ProductVariant, ProductImage]),
+    CloudinaryModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

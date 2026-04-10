@@ -1,133 +1,230 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, Like } from 'typeorm';
+import { Repository, DataSource, Like, IsNull } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service'; 
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private productRepo: Repository<Product>,
+    @InjectRepository(ProductImage) private imageRepo: Repository<ProductImage>,
     private dataSource: DataSource,
+    private cloudinaryService: CloudinaryService, 
   ) {}
 
   // =====================================
-  // NGHIỆP VỤ VALIDATION NỘI BỘ
+  // HELPERS
   // =====================================
-  private validateImages(images: any[]) {
-    const thumbnailCount = images.filter((img) => img.isThumbnail).length;
-    if (thumbnailCount !== 1) {
-      throw new BadRequestException('Sản phẩm phải có chính xác 1 ảnh đại diện (Thumbnail)');
+
+  // Parse mảng Variants từ chuỗi JSON (Form-data)
+  private parseVariants(variantsData: any): any[] {
+    if (!variantsData) return [];
+    
+    // Nếu Frontend gửi lên chuỗi JSON (khi dùng form-data)
+    if (typeof variantsData === 'string') {
+      try { 
+        return JSON.parse(variantsData); 
+      } catch (e) { 
+        throw new BadRequestException('Định dạng variants không hợp lệ, phải là chuỗi JSON'); 
+      }
     }
+    
+    // Nếu NestJS đã tự parse thành mảng
+    if (Array.isArray(variantsData)) {
+      return variantsData;
+    }
+
+    return [];
   }
 
-  private calculateStockStatus(variants: any[]): boolean {
-    const totalStock = variants.reduce((sum, v) => sum + v.stockQuantity, 0);
-    return totalStock > 0;
+  // Đánh giá tồn kho: Có biến thể thì tính tổng biến thể, không thì lấy tồn kho gốc
+  private calculateStockStatus(variants: any[], baseStock: number): number {
+    if (variants && variants.length > 0) {
+      return variants.reduce((sum, v) => sum + Number(v.stockQuantity), 0);
+    }
+    return Number(baseStock) || 0;
   }
 
-  private getThumbnailUrl(images: any[]): string {
-    return images.find(img => img.isThumbnail)?.imageUrl || null;
+  private calculateBasePrice(variants: any[], inputPrice: number): number {
+    if (variants && variants.length > 0) {
+      return Math.min(...variants.map(v => Number(v.price)));
+    }
+    return Number(inputPrice) || 0;
   }
 
   // =====================================
-  // API TẠO & CẬP NHẬT SẢN PHẨM
+  // API TẠO MỚI (CREATE)
   // =====================================
-  async createProduct(dto: CreateProductDto) {
-    this.validateImages(dto.images);
-    const isStock = this.calculateStockStatus(dto.variants);
-    const thumbnailUrl = this.getThumbnailUrl(dto.images);
+  async createProduct(dto: CreateProductDto, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[]) {
+    if (!thumbnailFile) throw new BadRequestException('Bắt buộc phải tải lên ảnh đại diện (thumbnail)');
+
+    const variants = this.parseVariants(dto.variants);
+    const totalStock = this.calculateStockStatus(variants, dto.stockQuantity || 0);
+    const isStock = totalStock > 0;
+    const basePrice = this.calculateBasePrice(variants, dto.price || 0);
+    
+    // 1. Upload ảnh lên Cloudinary
+    const thumbUpload = await this.cloudinaryService.uploadImageProducts(thumbnailFile);
+    const thumbnailUrl = thumbUpload.secure_url;
+
+    const galleryUrls: string[] = [];
+    if (galleryFiles && galleryFiles.length > 0) {
+      const uploadPromises = galleryFiles.map(file => this.cloudinaryService.uploadImageProducts(file));
+      const results = await Promise.all(uploadPromises);
+      galleryUrls.push(...results.map(r => r.secure_url));
+    }
 
     return this.dataSource.transaction(async (manager) => {
-      // 1. Tạo Product
+      // 2. Tạo Product
       const product = manager.create(Product, {
-        product_code: dto.productCode,
         product_name: dto.productName,
+        slug: dto.slug,
         product_description: dto.productDescription,
-        product_img: thumbnailUrl,
-        in_popular: dto.inPopular || false,
+        status: dto.status || 'ACTIVE',
+        price: basePrice, 
+        stock_quantity: totalStock,
         is_stock: isStock,
-        brand: dto.brandId ? { id: dto.brandId } as any : null, // Relational Mapping
+        in_popular: dto.inPopular || false,
+        brand: dto.brandId ? { brand_id: dto.brandId } as any : null,
       });
       const savedProduct = await manager.save(product);
 
-      // 2. Tạo Images
-      const imagesToSave = dto.images.map((img) =>
-        manager.create(ProductImage, {
-          image_url: img.imageUrl,
-          is_thumbnail: img.isThumbnail,
-          product: savedProduct,
-        })
-      );
-      await manager.save(imagesToSave);
+      // 3. Lưu mảng Hình ảnh vào DB
+      const imageEntities = [
+        manager.create(ProductImage, { image_url: thumbnailUrl, is_thumbnail: true, product: savedProduct }),
+        ...galleryUrls.map(url => manager.create(ProductImage, { image_url: url, is_thumbnail: false, product: savedProduct }))
+      ];
+      await manager.save(imageEntities);
 
-      // 3. Tạo Variants
-      const variantsToSave = dto.variants.map((v) =>
-        manager.create(ProductVariant, {
-          size_name: v.sizeName,
-          color_name: v.colorName,
-          price: v.price,
-          stock_quantity: v.stockQuantity,
-          product: savedProduct,
-        })
-      );
-      await manager.save(variantsToSave);
+      // 4. Lưu Variants
+      if (variants.length > 0) {
+        const variantsToSave = variants.map((v) =>
+          manager.create(ProductVariant, {
+            size_name: v.sizeName, 
+            color_name: v.colorName, 
+            price: v.price, 
+            stock_quantity: v.stockQuantity, 
+            product: savedProduct,
+          })
+        );
+        await manager.save(variantsToSave);
+      }
 
-      return this.getProductById(savedProduct.product_id); // Trả về Full detail
+      return manager.findOne(Product, { 
+        where: { product_id: savedProduct.product_id }, 
+        relations: ['variants', 'images'] 
+      });
     });
   }
 
-  async updateProduct(id: number, dto: CreateProductDto) {
-    const existingProduct = await this.productRepo.findOne({ where: { product_id: id } });
+  // =====================================
+  // API CẬP NHẬT (UPDATE)
+  // =====================================
+  async updateProduct(id: number, dto: CreateProductDto, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[]) {
+    const existingProduct = await this.productRepo.findOne({ 
+      where: { product_id: id }, 
+      relations: ['images'] 
+    });
     if (!existingProduct) throw new NotFoundException('Không tìm thấy sản phẩm');
 
-    this.validateImages(dto.images);
-    const isStock = this.calculateStockStatus(dto.variants);
-    const thumbnailUrl = this.getThumbnailUrl(dto.images);
+    const variants = this.parseVariants(dto.variants);
+    const totalStock = this.calculateStockStatus(variants, dto.stockQuantity || 0);
+    const isStock = totalStock > 0;
+    const basePrice = this.calculateBasePrice(variants, dto.price || 0);
+    
+    // XỬ LÝ ẢNH & TÌM ẢNH BỊ XÓA (Garbage Collection)
+    const oldImageUrls = existingProduct.images.map(img => img.image_url);
+    const retainedUrls: string[] = dto.retainedImagesJson ? JSON.parse(dto.retainedImagesJson) : oldImageUrls; 
+    
+    const imagesToDeleteFromCloudinary = oldImageUrls.filter(url => !retainedUrls.includes(url));
+
+    // Upload Thumbnail MỚI (nếu có)
+    let finalThumbnailUrl = existingProduct.images.find(img => img.is_thumbnail)?.image_url;
+    if (thumbnailFile) {
+      const thumbUpload = await this.cloudinaryService.uploadImageProducts(thumbnailFile);
+      finalThumbnailUrl = thumbUpload.secure_url;
+      
+      const oldThumb = existingProduct.images.find(img => img.is_thumbnail);
+      if (oldThumb && !imagesToDeleteFromCloudinary.includes(oldThumb.image_url)) {
+        imagesToDeleteFromCloudinary.push(oldThumb.image_url);
+      }
+    }
+
+    // Upload Gallery MỚI (nếu có)
+    const newGalleryUrls: string[] = [];
+    if (galleryFiles && galleryFiles.length > 0) {
+      const uploadPromises = galleryFiles.map(file => this.cloudinaryService.uploadImageProducts(file));
+      const results = await Promise.all(uploadPromises);
+      newGalleryUrls.push(...results.map(r => r.secure_url));
+    }
 
     return this.dataSource.transaction(async (manager) => {
       // 1. Cập nhật thông tin gốc
       await manager.update(Product, id, {
-        product_code: dto.productCode,
-        product_name: dto.productName,
-        product_description: dto.productDescription,
-        product_img: thumbnailUrl,
+        product_name: dto.productName, 
+        slug: dto.slug,
+        product_description: dto.productDescription, 
+        status: dto.status,
         in_popular: dto.inPopular,
+        price: basePrice, 
+        stock_quantity: totalStock, 
         is_stock: isStock,
-        brand: dto.brandId ? { id: dto.brandId } as any : null,
+        brand: dto.brandId ? { brand_id: dto.brandId } as any : null,
       });
 
-      // 2. Clear data cũ (Xóa Images & Variants hiện tại nhờ cơ chế Cascade / tay)
+      // 2. Clear cũ và Chèn DB mới
       await manager.delete(ProductImage, { product: { product_id: id } });
       await manager.delete(ProductVariant, { product: { product_id: id } });
 
-      // 3. Chèn data mới
-      const newImages = dto.images.map(img => manager.create(ProductImage, { ...img, image_url: img.imageUrl, is_thumbnail: img.isThumbnail, product: { product_id: id } as any }));
-      const newVariants = dto.variants.map(v => manager.create(ProductVariant, { ...v, size_name: v.sizeName, color_name: v.colorName, stock_quantity: v.stockQuantity, product: { product_id: id } as any }));
+      // Lọc bỏ URL của thumbnail cũ (nếu có trong retained) để không bị nhầm thành gallery
+      const finalGalleryUrls = retainedUrls.filter(url => url !== existingProduct.images.find(img => img.is_thumbnail)?.image_url);
       
-      await manager.save(newImages);
-      await manager.save(newVariants);
+      const imageEntities = [
+        manager.create(ProductImage, { image_url: finalThumbnailUrl, is_thumbnail: true, product: { product_id: id } as any }),
+        ...finalGalleryUrls.map(url => manager.create(ProductImage, { image_url: url, is_thumbnail: false, product: { product_id: id } as any })),
+        ...newGalleryUrls.map(url => manager.create(ProductImage, { image_url: url, is_thumbnail: false, product: { product_id: id } as any }))
+      ];
+      await manager.save(imageEntities);
 
-      return this.getProductById(id);
+      if (variants.length > 0) {
+        const newVariants = variants.map(v => manager.create(ProductVariant, { size_name: v.sizeName, color_name: v.colorName, price: v.price, stock_quantity: v.stockQuantity, product: { product_id: id } as any }));
+        await manager.save(newVariants);
+      }
+
+      // 3. 🌟 GỌI HÀM CLOUDINARY ĐỂ DỌN RÁC
+      imagesToDeleteFromCloudinary.forEach(async (url) => {
+        const publicId = this.cloudinaryService.extractPublicId(url);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId).catch((err) => {
+             console.error(`[CẢNH BÁO] Lỗi xóa ảnh lúc update: ${publicId}`, err);
+          });
+        }
+      });
+
+      return manager.findOne(Product, { 
+        where: { product_id: id }, 
+        relations: ['variants', 'images'] 
+      });
     });
   }
 
   // =====================================
-  // API TRUY VẤN
+  // API TRUY VẤN VÀ XÓA
   // =====================================
   async getProducts(keyword: string = '', page: number = 1, limit: number = 10, isPopular?: boolean) {
     const skip = (page - 1) * limit;
     
-    // Xây dựng điều kiện query linh hoạt
     const whereCondition: any = {};
     if (keyword) whereCondition.product_name = Like(`%${keyword}%`);
     if (isPopular !== undefined) whereCondition.in_popular = isPopular;
 
     const [items, totalElements] = await this.productRepo.findAndCount({
       where: whereCondition,
-      relations: ['brand', 'variants'], // Eager load variants để show giá min/max ở list
+      relations: ['brand', 'variants', 'images'], 
       skip,
       take: limit,
       order: { created_at: 'DESC' },
@@ -147,9 +244,9 @@ export class ProductsService {
   async getProductById(id: number) {
     const product = await this.productRepo.findOne({
       where: { product_id: id },
-      relations: ['brand', 'variants', 'images'], // Load toàn bộ child entities
+      relations: ['brand', 'variants', 'images'],
       order: {
-        images: { is_thumbnail: 'DESC', image_id: 'ASC' }, // Sort Thumbnail lên đầu
+        images: { is_thumbnail: 'DESC', image_id: 'ASC' },
       }
     });
 
@@ -158,8 +255,34 @@ export class ProductsService {
   }
 
   async deleteProduct(id: number) {
-    const result = await this.productRepo.delete(id);
-    if (result.affected === 0) throw new NotFoundException('Không tìm thấy sản phẩm');
-    return { message: 'Đã xóa sản phẩm thành công' };
+    const product = await this.productRepo.findOne({
+      where: { product_id: id },
+      relations: ['images']
+    });
+    if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
+
+    const imageUrls = product.images.map(img => img.image_url);
+    
+    // Xóa trong DB
+    await this.productRepo.delete(id);
+
+    // 🌟 GỌI HÀM CLOUDINARY ĐỂ XÓA ẢNH
+    if (imageUrls.length > 0) {
+      Promise.allSettled(
+        imageUrls.map(async (url) => {
+          const publicId = this.cloudinaryService.extractPublicId(url);
+          if (publicId) {
+            await this.cloudinaryService.deleteImage(publicId);
+          }
+        })
+      ).then(results => {
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) {
+           console.error(`[CẢNH BÁO] Thất bại khi xóa ${failed.length} ảnh trên Cloudinary cho SP ID ${id}`);
+        }
+      });
+    }
+
+    return { message: 'Đã xóa sản phẩm và dọn sạch hình ảnh trên Cloud' };
   }
 }

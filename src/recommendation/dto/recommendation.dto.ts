@@ -8,9 +8,6 @@ export class RecommendationResponseDto {
   @ApiProperty({ description: 'Tên nhạc cụ' })
   productName: string;
 
-  @ApiProperty({ description: 'Mã sản phẩm' })
-  productCode: string;
-
   @ApiPropertyOptional({ description: 'URL Ảnh đại diện chính' })
   thumbnailUrl: string | null;
 

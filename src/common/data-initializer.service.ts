@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { User } from '@/users/entities/user.entity';
 import { UserRole } from '@/users/enums/user-role.enum';
-import { CartsService } from '@/carts/carts.service';
+import { CartService } from '@/carts/carts.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class DataInitializer implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly cartsService: CartsService,
+    private readonly cartsService: CartService,
     private readonly dataSource: DataSource, // Thay cho DataSource bên Java
   ) {}
 

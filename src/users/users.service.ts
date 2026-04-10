@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { RegisterDto } from '@/auth/dto/auth.dto';
-import { CartsService } from '@/carts/carts.service';
+import { CartService } from '@/carts/carts.service';
 import { RevenuesService } from '@/revenues/revenues.service'; 
 import { UserRole } from '@/users/enums/user-role.enum';
 import { ChangePasswordDto } from '@/users/dto/change-password.dto';
@@ -16,7 +16,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly cartsService: CartsService,
+    private readonly cartsService: CartService,
     private readonly revenuesService: RevenuesService,
     private readonly mailerService: MailerService,
   ) {}

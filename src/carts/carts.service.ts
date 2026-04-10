@@ -5,7 +5,7 @@ import { Cart } from './entities/cart.entity';
 import { User } from '@/users/entities/user.entity';
 
 @Injectable()
-export class CartsService {
+export class CartService {
   constructor(
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>,
