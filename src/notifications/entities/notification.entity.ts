@@ -1,8 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
+import { NotificationType } from '../enums/notification-type.enum';
 
 @Entity('notifications')
+@Index('idx_notification_user_unread', ['user', 'is_read'])
 export class Notification {
   @ApiProperty({ example: 1 })
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -16,15 +18,19 @@ export class Notification {
   @Column({ type: 'text' })
   message: string;
 
+  @ApiProperty({ enum: NotificationType, default: NotificationType.INFO })
+  @Column({ type: 'varchar', length: 50, default: NotificationType.INFO })
+  type: NotificationType;
+
   @ApiProperty({ example: false })
   @Column({ default: false })
   is_read: boolean;
 
   @ApiProperty()
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @ManyToOne(() => User, (user) => user.user_id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
