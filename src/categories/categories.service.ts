@@ -19,14 +19,14 @@ export class CategoriesService {
   // ==========================================
   // PUBLIC API - DÀNH CHO KHÁCH HÀNG (TINH HOA BE 1)
   // ==========================================
-  async getCategoryTree() {
-    // 1. Chỉ lấy những danh mục đang hoạt động
+  async getCategoryTree(includeInactive: boolean = false) {
+    // 1. Lấy danh mục (Tùy chọn lọc active hoặc lấy hết)
     const allCategories = await this.categoryRepository.find({
-      where: { is_active: true },
+      where: includeInactive ? {} : { is_active: true },
       order: { level: 'ASC', created_at: 'ASC' },
     });
 
-    // 2. Build Tree bằng Map (Tối ưu hiệu năng y hệt Java BE 1)
+    // 2. Build Tree bằng Map (Tối ưu hiệu năng)
     const categoryMap = new Map();
     const rootCategories: any[] = [];
 
@@ -38,9 +38,13 @@ export class CategoriesService {
     // Lắp ráp cành lá vào thân cây
     categoryMap.forEach((category) => {
       if (category.parent_id) {
-        const parent = categoryMap.get(Number(category.parent_id));
+        const parentId = Number(category.parent_id);
+        const parent = categoryMap.get(parentId);
         if (parent) {
           parent.children.push(category);
+        } else {
+          // BỐ TRÍ LẠI: Nếu cha bị ẩn/xóa nhưng con vẫn active, cho nó lên Root để tránh mất dữ liệu
+          rootCategories.push(category);
         }
       } else {
         rootCategories.push(category); // Level 1

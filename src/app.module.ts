@@ -28,6 +28,7 @@ import { SearchModule } from './search/search.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { HomePageModule } from './home-page/home-page.module';
 import { TrackingModule } from './tracking/tracking.module';
+import { VnpayModule } from './vnpay/vnpay.module';
 
 @Module({
   imports: [
@@ -124,6 +125,8 @@ import { TrackingModule } from './tracking/tracking.module';
     HomePageModule,
 
     TrackingModule,
+
+    VnpayModule,
   ],
   controllers: [AppController],
   providers: [AppService],

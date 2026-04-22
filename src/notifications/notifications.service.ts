@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { PaginationQueryDto } from './dto/notifications.dto';
+import { NotificationType } from './enums/notification-type.enum';
 
 @Injectable()
 export class NotificationsService {
@@ -92,5 +93,60 @@ export class NotificationsService {
     
     // result.affected trả về số lượng dòng đã được update thành công
     return result.affected || 0; 
+  }
+
+  /**
+   * Tạo thông báo mới
+   */
+  async createNotification(userId: number, title: string, message: string, type: NotificationType): Promise<Notification> {
+    const notification = this.notificationRepo.create({
+      user: { user_id: userId } as any,
+      title,
+      message,
+      type,
+      is_read: false,
+    });
+    return await this.notificationRepo.save(notification);
+  }
+
+  /**
+   * Nghiệp vụ gửi thông báo đơn hàng tự động
+   */
+  async sendOrderNotification(userId: number, orderCode: string, status: string) {
+    let title = '';
+    let message = '';
+
+    switch (status) {
+      case 'PENDING':
+        title = 'Đặt hàng thành công';
+        message = `Đơn hàng ${orderCode} của bạn đã được tiếp nhận và đang chờ xử lý.`;
+        break;
+      case 'PACKING':
+      case 'PROCESSING':
+        title = 'Đơn hàng đang xử lý';
+        message = `Đơn hàng ${orderCode} của bạn đang được đóng gói.`;
+        break;
+      case 'SHIPPING':
+        title = 'Đơn hàng đang vận chuyển';
+        message = `Đơn hàng ${orderCode} đã được bàn giao cho đơn vị vận chuyển.`;
+        break;
+      case 'DELIVERED':
+        title = 'Giao hàng thành công';
+        message = `Đơn hàng ${orderCode} đã được giao thành công. Cảm ơn bạn đã mua hàng!`;
+        break;
+      case 'CANCELLED_BY_USER':
+        title = 'Hủy đơn hàng thành công';
+        message = `Bạn đã hủy thành công đơn hàng ${orderCode}.`;
+        break;
+      case 'CANCELLED':
+        title = 'Đơn hàng đã hủy';
+        message = `Đơn hàng ${orderCode} của bạn đã bị hủy.`;
+        break;
+      default:
+        title = 'Cập nhật đơn hàng';
+        message = `Đơn hàng ${orderCode} có cập nhật trạng thái mới: ${status}.`;
+    }
+
+    return await this.createNotification(userId, title, message, NotificationType.ORDER);
   }
 }

@@ -18,6 +18,8 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
+
 
 @ApiTags('Products (Quản lý Nhạc cụ)')
 @Controller('products')
@@ -48,7 +50,7 @@ export class ProductsController {
     return {
       status: 201,
       message: 'Tạo sản phẩm thành công',
-      data,
+      data: ProductResponseDto.fromEntity(data),
     };
   }
 
@@ -63,25 +65,40 @@ export class ProductsController {
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Số item trên 1 trang (Mặc định: 10)' })
   @ApiQuery({ name: 'isPopular', required: false, type: Boolean, description: 'Lọc sản phẩm nổi bật' })
   async findAll(
-    @Query('keyword') keyword?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
-    @Query('isPopular') isPopular?: string,
+    @Query() query: any,
   ) {
-    // Xử lý cờ boolean từ query string URL
-    const popularFlag = isPopular === 'true' ? true : isPopular === 'false' ? false : undefined;
-    
-    const data = await this.productsService.getProducts(keyword, page, limit, popularFlag);
+    const data = await this.productsService.getProducts(query);
     
     return {
       status: 200,
       message: 'Lấy danh sách sản phẩm thành công',
-      data,
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
     };
   }
 
   // =====================================
-  // 3. LẤY CHI TIẾT 1 SẢN PHẨM
+  // 3. LẤY DANH SÁCH SẢN PHẨM MỚI (NEW ARRIVALS)
+  // =====================================
+  @Get('arrivals')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm mới nhất (Có phân trang & Lọc)' })
+  async getArrivals(@Query() query: any) {
+    const data = await this.productsService.getNewArrivals(query);
+    return {
+      status: 200,
+      message: 'Lấy sản phẩm mới nhất thành công',
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
+    };
+  }
+
+  // =====================================
+  // 4. LẤY CHI TIẾT 1 SẢN PHẨM
   // =====================================
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -93,7 +110,7 @@ export class ProductsController {
     return {
       status: 200,
       message: 'Lấy chi tiết sản phẩm thành công',
-      data,
+      data: ProductResponseDto.fromEntity(data),
     };
   }
 
@@ -122,7 +139,7 @@ export class ProductsController {
     return {
       status: 200,
       message: 'Cập nhật sản phẩm thành công',
-      data,
+      data: ProductResponseDto.fromEntity(data),
     };
   }
 

@@ -21,8 +21,10 @@ export class CategoriesController {
   // Tinh hoa BE 1: Trả về cây thư mục 3 cấp cho FE vẽ Menu
   @Get('tree')
   @ApiOperation({ summary: 'Lấy cây Danh mục (Phục vụ Menu Khách hàng)' })
-  async getCategoryTree() {
-    const tree = await this.categoriesService.getCategoryTree();
+  @ApiQuery({ name: 'all', required: false, type: Boolean, description: 'Lấy tất cả bao gồm cả ẩn' })
+  async getCategoryTree(@Query('all') all?: string) {
+    const includeInactive = all === 'true';
+    const tree = await this.categoriesService.getCategoryTree(includeInactive);
     return { status: 200, message: 'Lấy cây danh mục thành công', data: tree };
   }
 

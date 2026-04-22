@@ -2,8 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { ApiProperty } from '@nestjs/swagger';
 import { Cart } from './cart.entity';
 import { Product } from '@/products/entities/product.entity';
-import { ProductVariant } from '@/products/entities/product-variant.entity';
-
 @Entity('cart_items')
 export class CartItem {
   @ApiProperty({ example: 1 })
@@ -13,10 +11,6 @@ export class CartItem {
   @ApiProperty({ example: 2, description: 'Số lượng sản phẩm' })
   @Column({ type: 'int', default: 1 })
   quantity: number;
-
-  @ApiProperty({ example: 'Size 4/4', nullable: true })
-  @Column({ length: 20, nullable: true })
-  product_size: string;
 
   @ApiProperty({ example: 3000000.00, description: 'Thành tiền cho item này' })
   @Column({ type: 'numeric', precision: 15, scale: 2, nullable: true })
@@ -33,8 +27,4 @@ export class CartItem {
   @ManyToOne(() => Product, (product) => product.cartItems)
   @JoinColumn({ name: 'product_id' })
   product: Product;
-
-  @ManyToOne(() => ProductVariant, { nullable: true })
-  @JoinColumn({ name: 'variant_id' })
-  variant: ProductVariant;
 }

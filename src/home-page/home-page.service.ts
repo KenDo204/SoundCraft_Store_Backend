@@ -18,10 +18,10 @@ export class HomePageService {
       // Giúp giảm thời gian chờ xuống chỉ bằng thời gian của câu query chậm nhất
       const [latestProducts, popularProducts, forYouProducts] = await Promise.all([
         // 1. Lấy 10 nhạc cụ mới nhất
-        this.productsService.getProducts('', 1, 10), 
+        this.productsService.getProducts({}), 
         
         // 2. Lấy 10 nhạc cụ bán chạy/phổ biến (isPopular = true)
-        this.productsService.getProducts('', 1, 10, true), 
+        this.productsService.getProducts({isPopular: true}), 
         
         // 3. Lấy gợi ý nếu user đã đăng nhập, ngược lại trả về mảng rỗng
         userId ? this.recommendationService.getForYouProducts(userId) : Promise.resolve([]),

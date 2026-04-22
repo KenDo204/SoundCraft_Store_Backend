@@ -1,0 +1,26 @@
+﻿src/orders/orders.controller.ts(1,89): error TS2307: Cannot find module '@nestjs/Request' or its corresponding type declarations.
+src/orders/orders.controller.ts(25,5): error TS2322: Type '{ orderId: any; orderCode: any; totalAmount: number; status: any; paymentUrl: null; }' is not assignable to type 'CheckoutResponseDto'.
+  Types of property 'paymentUrl' are incompatible.
+    Type 'null' is not assignable to type 'string | undefined'.
+src/orders/orders.service.ts(8,10): error TS2724: '"../carts/carts.service"' has no exported member named 'CartsService'. Did you mean 'CartService'?
+src/orders/orders.service.ts(9,10): error TS2724: '"../addresses/addresses.service"' has no exported member named 'AddressesService'. Did you mean 'AddressService'?
+src/orders/orders.service.ts(64,36): error TS2339: Property 'reserveStock' does not exist on type 'ProductsService'.
+src/orders/orders.service.ts(70,52): error TS2339: Property 'validateAndCalculateDiscount' does not exist on type 'CouponsService'.
+src/orders/orders.service.ts(78,70): error TS2345: Argument of type '{ toDistrictId: any; toWardCode: any; weight: number; insuranceValue: number; }' is not assignable to parameter of type 'ShippingFeeRequestDto'.
+  Property 'fromDistrictId' is missing in type '{ toDistrictId: any; toWardCode: any; weight: number; insuranceValue: number; }' but required in type 'ShippingFeeRequestDto'.
+src/orders/orders.service.ts(85,27): error TS2365: Operator '+' cannot be applied to types 'number' and 'ShippingFeeResponseDto'.
+src/orders/orders.service.ts(89,39): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(entityLikeArray: DeepPartial<Order>[]): Order[]', gave the following error.
+    Object literal may only specify known properties, and 'order_code' does not exist in type 'DeepPartial<Order>[]'.
+  Overload 2 of 3, '(entityLike: DeepPartial<Order>): Order', gave the following error.
+    Type 'ShippingFeeResponseDto' is not assignable to type 'number'.
+src/orders/orders.service.ts(111,11): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(entityLikeArray: DeepPartial<OrderItem>[]): OrderItem[]', gave the following error.
+    Object literal may only specify known properties, and 'order' does not exist in type 'DeepPartial<OrderItem>[]'.
+  Overload 2 of 3, '(entityLike: DeepPartial<OrderItem>): OrderItem', gave the following error.
+    Type 'Order[]' is not assignable to type 'DeepPartial<Order> | undefined'.
+src/orders/orders.service.ts(136,29): error TS2339: Property 'order_id' does not exist on type 'Order[]'.
+src/orders/orders.service.ts(137,31): error TS2339: Property 'order_code' does not exist on type 'Order[]'.
+src/orders/orders.service.ts(138,40): error TS2339: Property 'total_amount' does not exist on type 'Order[]'.
+src/orders/orders.service.ts(139,28): error TS2339: Property 'status' does not exist on type 'Order[]'.
+src/orders/orders.service.ts(177,93): error TS2554: Expected 2 arguments, but got 3.

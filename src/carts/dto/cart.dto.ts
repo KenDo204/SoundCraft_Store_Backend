@@ -1,20 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, Min, IsOptional, IsString, IsArray, IsNumber } from 'class-validator';
+import { IsInt, Min, IsOptional, IsString, IsArray, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class UpsertCartItemDto {
   @ApiProperty({ example: 1, description: 'ID của Sản phẩm gốc' })
   @IsNumber()
   productId: number;
 
-  @ApiPropertyOptional({ example: 10, description: 'ID của Biến thể (VD: Màu sắc, Loại gỗ)' })
-  @IsOptional()
-  @IsNumber()
-  variantId?: number;
-
-  @ApiPropertyOptional({ example: 'Size 4/4', description: 'Kích cỡ (VD: Dành cho Violin)' })
-  @IsOptional()
-  @IsString()
-  productSize?: string;
 
   @ApiProperty({ example: 1, description: 'Số lượng muốn thêm/cập nhật' })
   @IsInt()
@@ -46,3 +37,42 @@ export class BulkDeleteCartItemsDto {
   @IsNumber({}, { each: true })
   cartItemIds: number[];
 }
+
+export class CartItemResponseDto {
+  @ApiProperty({ example: 1 })
+  cart_item_id: number;
+
+  @ApiProperty({ example: 2 })
+  quantity: number;
+
+  @ApiPropertyOptional({ example: 'https://link-anh.com/guitar.jpg', description: 'Ảnh Thumbnail' })
+  imageUrl?: string;
+
+  @ApiProperty({ example: 3000000.00 })
+  total_money: number;
+
+  @ApiProperty({ example: true, description: 'Sản phẩm có thể mua được không?' })
+  isAvailable: boolean;
+
+  @ApiPropertyOptional({ example: 'Hết hàng', description: 'Lý do vô hiệu hóa (nếu isAvailable = false)' })
+  disableReason?: string;
+
+  @ApiProperty({ example: 3000000.00, description: 'Giá của sản phẩm tại thời điểm hiện tại' })
+  currentPrice: number;
+
+  @ApiProperty({ example: 5, description: 'Số lượng tối đa FE cho phép bấm dấu cộng (+)' })
+  maxAllowedQuantity: number;
+
+}
+
+export class CartResponseDto {
+  @ApiProperty({ example: 1 })
+  cart_id: number;
+
+  @ApiProperty({ type: [CartItemResponseDto] })
+  items: CartItemResponseDto[];
+
+  @ApiProperty({ example: 6000000.00 })
+  totalCartMoney: number;
+}
+

@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Brand } from '@/brands/entities/brand.entity';
-import { ProductVariant } from './product-variant.entity';
 import { ProductImage } from './product-image.entity';
 import { CartItem } from '@/carts/entities/cart-item.entity';
 
@@ -36,17 +35,29 @@ export class Product {
   @Column({ length: 20, default: 'ACTIVE' })
   status: string;
 
-  @ApiProperty({ example: 1500000.00, description: 'Giá cho sản phẩm' })
+  @ApiProperty({ example: 1500000.00, description: 'Giá bán cho sản phẩm' })
   @Column({ type: 'numeric', precision: 15, scale: 2, default: 0 })
   price: number;
+
+  @ApiProperty({ example: 1800000.00, description: 'Giá gốc cho sản phẩm (trước khi giảm giá)' })
+  @Column({ type: 'numeric', precision: 15, scale: 2, default: 0 })
+  original_price: number;
 
   @ApiProperty({ example: 10, description: 'Số lượng tồn kho' })
   @Column({ type: 'int', default: 0 })
   stock_quantity: number;
 
+  @ApiProperty({ example: 5, description: 'Giới hạn số lượng mua tối đa trên 1 đơn hàng (0 là không giới hạn)' })
+  @Column({ type: 'int', default: 0 })
+  max_order_quantity: number;
+
   @ManyToOne(() => Brand, (brand) => brand.products, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'brand_id' })
   brand: Brand;
+
+  @ManyToOne('Category', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'category_id' })
+  category: any; // Sử dụng any hoặc import Category để tránh vòng lặp circular dependency if needed
 
   @ApiProperty()
   @CreateDateColumn({ type: 'timestamp' })
@@ -56,8 +67,6 @@ export class Product {
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.product)
-  variants: ProductVariant[];
 
   @OneToMany(() => ProductImage, (image) => image.product)
   images: ProductImage[];

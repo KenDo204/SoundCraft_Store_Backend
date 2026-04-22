@@ -30,6 +30,10 @@ export class BrandsService {
   }
 
   async findOne(id: number) {
+    if (!id || isNaN(id)) {
+      throw new BadRequestException('ID thương hiệu không hợp lệ.');
+    }
+
     const brand = await this.brandRepository.findOne({ where: { brand_id: id } });
     if (!brand) {
       throw new NotFoundException(`Không tìm thấy thương hiệu với ID: ${id}`);
@@ -141,10 +145,7 @@ export class BrandsService {
   // ==========================================
   async remove(id: number) {
     // 1. Kiểm tra tồn tại
-    const brand = await this.brandRepository.findOne({ where: { brand_id: id } });
-    if (!brand) {
-      throw new NotFoundException(`Không tìm thấy thương hiệu với ID: ${id}`);
-    }
+    const brand = await this.findOne(id);
 
     // 2. Tối ưu: Chỉ đếm số lượng sản phẩm thay vì load cả list products (Tránh N+1/Memory leak)
     // Giả sử ProductRepository được tiêm vào hoặc dùng manager

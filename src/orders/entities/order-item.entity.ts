@@ -2,8 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { ApiProperty } from '@nestjs/swagger';
 import { Order } from './order.entity';
 import { Product } from '@/products/entities/product.entity';
-import { ProductVariant } from '@/products/entities/product-variant.entity';
-
 @Entity('order_items')
 export class OrderItem {
   @ApiProperty({ example: 1 })
@@ -18,10 +16,6 @@ export class OrderItem {
   @Column({ type: 'numeric', precision: 15, scale: 2 })
   price_at_purchase: number;
 
-  @ApiProperty({ description: 'Lưu snapshot thông tin biến thể dưới dạng JSON', nullable: true })
-  @Column({ type: 'jsonb', nullable: true })
-  variant_info: any;
-
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order: Order;
@@ -29,8 +23,4 @@ export class OrderItem {
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
-
-  @ManyToOne(() => ProductVariant, { nullable: true })
-  @JoinColumn({ name: 'variant_id' })
-  variant: ProductVariant;
 }

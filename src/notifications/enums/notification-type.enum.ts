@@ -3,4 +3,5 @@ export enum NotificationType {
     ORDER = 'ORDER',
     PROMOTION = 'PROMOTION',
     SYSTEM = 'SYSTEM',
+    PRE_ORDER = 'PRE_ORDER',
 }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 import { Product } from '@/products/entities/product.entity';
@@ -10,8 +10,13 @@ export class Wishlist {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   wishlist_id: number;
 
-  @CreateDateColumn()
+  @ApiProperty({ type: Date })
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
+
+  @ApiProperty({ type: Date })
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

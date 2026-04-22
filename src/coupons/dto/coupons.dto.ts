@@ -33,6 +33,12 @@ export class CreateCouponDto {
   @Min(1)
   maxUsage: number;
 
+  @ApiPropertyOptional({ example: 1, description: 'Số lượt sử dụng tối đa trên 1 tài khoản' })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxUsagePerUser?: number;
+
   @ApiProperty({ example: '2026-05-01T00:00:00Z' })
   @IsDateString()
   startDate: string;

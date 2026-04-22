@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -26,8 +26,8 @@ export class BrandsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết một thương hiệu theo ID' })
-  async getBrandById(@Param('id') id: string) {
-    const brand = await this.brandsService.findOne(+id);
+  async getBrandById(@Param('id', ParseIntPipe) id: number) {
+    const brand = await this.brandsService.findOne(id);
     return { status: 200, message: 'Lấy thông tin thương hiệu thành công', data: brand };
   }
 
@@ -58,11 +58,11 @@ export class BrandsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async updateBrand(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateBrandDto: UpdateBrandDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const brand = await this.brandsService.update(+id, updateBrandDto, file);
+    const brand = await this.brandsService.update(id, updateBrandDto, file);
     return { status: 200, message: 'Cập nhật thương hiệu thành công', data: brand };
   }
 
@@ -71,8 +71,8 @@ export class BrandsController {
   @Roles('ROLE_SUPER_ADMIN')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Xóa thương hiệu (Yêu cầu quyền Super Admin)' })
-  async deleteBrand(@Param('id') id: string) {
-    await this.brandsService.remove(+id);
+  async deleteBrand(@Param('id', ParseIntPipe) id: number) {
+    await this.brandsService.remove(id);
     // Xóa thành công không cần trả data
     return { status: 200, message: 'Xóa thương hiệu thành công' };
   }

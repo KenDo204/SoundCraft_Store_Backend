@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { ToggleWishlistDto } from './dto/toggle-wishlist.dto';
+import { WishlistStatusResponseDto } from './dto/wishlist-status-response.dto';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '@/auth/decorators/current-user.decorator';
 
+@ApiTags('Wishlists')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('wishlists')
 export class WishlistsController {
-  constructor(private readonly wishlistsService: WishlistsService) {}
+  constructor(private readonly wishlistsService: WishlistsService) { }
 
-  @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistsService.create(createWishlistDto);
+  @Post('toggle')
+  @ApiOperation({ summary: 'Thêm hoặc xóa sản phẩm khỏi danh sách yêu thích (Toggle)' })
+  @ApiResponse({ type: WishlistStatusResponseDto })
+  toggle(@CurrentUserId() userId: number, @Body() dto: ToggleWishlistDto): Promise<WishlistStatusResponseDto> {
+    return this.wishlistsService.toggleWishlist(userId, dto);
   }
 
-  @Get()
-  findAll() {
-    return this.wishlistsService.findAll();
+  @Get('me')
+  @ApiOperation({ summary: 'Lấy danh sách yêu thích của người dùng hiện tại' })
+  findMyWishlist(@CurrentUserId() userId: number, @Query() query: any) {
+    return this.wishlistsService.getMyWishlist(userId, query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistsService.findOne(+id);
+  @Get('check/:productId')
+  @ApiOperation({ summary: 'Kiểm tra trạng thái yêu thích của một sản phẩm' })
+  @ApiResponse({ type: WishlistStatusResponseDto })
+  checkStatus(
+    @CurrentUserId() userId: number,
+    @Param('productId', ParseIntPipe) productId: number
+  ): Promise<WishlistStatusResponseDto> {
+    return this.wishlistsService.checkInWishlist(userId, productId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistsService.update(+id, updateWishlistDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistsService.remove(+id);
+  @Delete(':productId')
+  @ApiOperation({ summary: 'Xóa một sản phẩm cụ thể khỏi danh sách yêu thích' })
+  remove(
+    @CurrentUserId() userId: number,
+    @Param('productId', ParseIntPipe) productId: number
+  ) {
+    return this.wishlistsService.removeFromWishlist(userId, productId);
   }
 }

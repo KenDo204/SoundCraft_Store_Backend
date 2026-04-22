@@ -84,8 +84,8 @@ export class Order {
   user: User;
 
   @OneToMany(() => OrderItem, (item) => item.order)
-    items: OrderItem[];
+  items: OrderItem[];
 
-    @OneToMany(() => Transaction, (transaction) => transaction.order)
-    transactions: Transaction[];
+  @OneToMany(() => Transaction, (transaction) => transaction.order)
+  transactions: Transaction[];
 }

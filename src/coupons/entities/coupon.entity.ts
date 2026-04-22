@@ -32,6 +32,10 @@ export class Coupon {
   @Column({ type: 'int', default: 1000 })
   max_usage: number;
 
+  @ApiProperty({ example: 1, description: 'Số lượt sử dụng tối đa mỗi user' })
+  @Column({ type: 'int', default: 1 })
+  max_usage_per_user: number;
+
   @ApiProperty()
   @Column({ type: 'timestamp' })
   start_date: Date;

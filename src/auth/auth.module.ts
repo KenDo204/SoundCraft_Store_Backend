@@ -11,10 +11,12 @@ import { TokenService } from './token.service';
 import { SocialAccountsService } from './social-accounts.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CartsModule } from 'src/carts/carts.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     UsersModule, 
+    HttpModule,
     PassportModule.register({ defaultStrategy: 'jwt' }), // <--- 2. KHAI BÁO NÓ VÀO ĐÂY
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET || 'your_backup_secret_key',

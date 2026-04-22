@@ -10,6 +10,7 @@ import { ChangePasswordDto } from '@/users/dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDto } from '@/auth/dto/forgot-password.dto';
+import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,7 @@ export class UsersService {
     private readonly cartsService: CartService,
     private readonly revenuesService: RevenuesService,
     private readonly mailerService: MailerService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findUserByEmail(email: string): Promise<User | null> {
@@ -85,10 +87,11 @@ export class UsersService {
   }
 
   // --- UPDATE PROFILE ---
-  async updateUser(userId: number, dto: any): Promise<User> {
-    const user = await this.findUserById(userId);
+  async updateUser(userId: number, dto: any, avatarFile?: Express.Multer.File): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { user_id: userId } }); 
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
 
+    // 1. Xử lý logic cơ bản
     if (dto.mobile && dto.mobile !== user.mobile) {
       const isMobileTaken = await this.userRepository.findOne({ where: { mobile: dto.mobile } });
       if (isMobileTaken) throw new BadRequestException('Số điện thoại đã tồn tại');
@@ -96,10 +99,9 @@ export class UsersService {
     }
 
     if (dto.full_name) user.full_name = dto.full_name;
-    if (dto.avatar) user.avatar = dto.avatar;
     if (dto.gender) user.gender = dto.gender;
 
-    // 3. Nghiệp vụ tính tuổi (phải >= 18)
+    // 2. Nghiệp vụ tính tuổi
     if (dto.dob) {
       const dobDate = new Date(dto.dob);
       const age = new Date().getFullYear() - dobDate.getFullYear();
@@ -107,6 +109,26 @@ export class UsersService {
         throw new BadRequestException('Người dùng phải từ 18 tuổi trở lên');
       }
       user.dob = dobDate;
+    }
+
+    // 🌟 3. NGHIỆP VỤ XỬ LÝ AVATAR VÀ DỌN RÁC CLOUDINARY
+    if (avatarFile) {
+      // Lưu lại URL avatar cũ (nếu có) trước khi ghi đè
+      const oldAvatarUrl = user.avatar;
+
+      // Upload ảnh mới lên Cloudinary
+      const uploadResult = await this.cloudinaryService.uploadImageUsers(avatarFile);
+      user.avatar = uploadResult.secure_url;
+
+      // Dọn rác: Xóa ảnh cũ trên Cloud (Chạy ngầm không block ứng dụng)
+      if (oldAvatarUrl) {
+        const publicId = this.cloudinaryService.extractPublicId(oldAvatarUrl);
+        if (publicId) {
+          this.cloudinaryService.deleteImage(publicId).catch((err) => {
+            console.error(`[CẢNH BÁO] Không thể xóa avatar cũ: ${publicId}`, err);
+          });
+        }
+      }
     }
 
     return this.userRepository.save(user);

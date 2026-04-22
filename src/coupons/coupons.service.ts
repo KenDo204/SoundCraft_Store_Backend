@@ -29,6 +29,7 @@ export class CouponsService {
       min_order_amount: dto.minOrderAmount,
       max_discount_amount: dto.maxDiscountAmount,
       max_usage: dto.maxUsage,
+      max_usage_per_user: dto.maxUsagePerUser || 1,
       start_date: new Date(dto.startDate),
       end_date: new Date(dto.endDate),
     });
@@ -125,19 +126,49 @@ export class CouponsService {
       throw new BadRequestException('Mã giảm giá đã hết lượt sử dụng trên toàn hệ thống.');
     }
 
-    const hasUserUsed = await this.usageRepo.exists({ 
+    const userUsedCount = await this.usageRepo.count({ 
       where: { user: { user_id: userId }, coupon: { coupon_id: coupon.coupon_id } } 
     });
     
-    if (hasUserUsed) {
-      throw new BadRequestException('Bạn đã sử dụng mã giảm giá này rồi.');
+    if (userUsedCount >= coupon.max_usage_per_user) {
+      throw new BadRequestException(`Bạn đã hết lượt sử dụng mã giảm giá này (Tối đa ${coupon.max_usage_per_user} lần/người).`);
     }
 
     return coupon;
   }
 
   // --- Các hàm Admin cơ bản ---
-  async getAllCoupons() { return await this.couponRepo.find({ order: { created_at: 'DESC' } }); }
+  async getAllCoupons() { 
+    return await this.couponRepo.find({ order: { created_at: 'DESC' } }); 
+  }
+
+  // --- Lấy danh sách Coupon còn hiệu lực cho User ---
+  async getAvailableCoupons() {
+    const now = new Date();
+    
+    // Lấy các coupon đang ACTIVE và còn trong khung giờ có hiệu lực
+    const queryBuilder = this.couponRepo.createQueryBuilder('coupon');
+    queryBuilder.where('coupon.is_active = :isActive', { isActive: true })
+      .andWhere('coupon.start_date <= :now', { now })
+      .andWhere('coupon.end_date >= :now', { now })
+      .orderBy('coupon.discount_value', 'DESC');
+      
+    const availableCoupons = await queryBuilder.getMany();
+    
+    // Loại bỏ các coupon đã hết lượt dùng chung
+    const validCoupons: any[] = [];
+    for (const coupon of availableCoupons) {
+      const usedCount = await this.usageRepo.count({ where: { coupon: { coupon_id: coupon.coupon_id } } });
+      if (usedCount < coupon.max_usage) {
+        validCoupons.push({
+          ...coupon,
+          current_usage: usedCount
+        });
+      }
+    }
+    
+    return validCoupons;
+  }
   
   async toggleActive(couponId: number) {
     const coupon = await this.couponRepo.findOne({ where: { coupon_id: couponId } });

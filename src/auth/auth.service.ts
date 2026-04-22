@@ -8,6 +8,7 @@ import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 import { User } from '@/users/entities/user.entity';
+import axios from 'axios';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -133,6 +134,13 @@ export class AuthService {
       await this.tokensService.revokeToken(refreshToken);
     }
     response.clearCookie('refresh_token');
+
+    response.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'strict',
+      path: '/',
+    });
   }
 
   // --- 5. GET ACCOUNT ---
@@ -155,13 +163,13 @@ export class AuthService {
   // --- 6. GOOGLE LOGIN ---
   async loginWithGoogle(dto: LoginWithGoogleDto, response: Response) {
     try {
-      const ticket = await client.verifyIdToken({
-        idToken: dto.token,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
-      if (!payload || !payload.email || !payload.name || !payload.sub) {
-        throw new BadRequestException('Token không hợp lệ hoặc thiếu thông tin');
+      const googleRes = await axios.get(
+        `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${dto.token}`
+      );
+      const payload = googleRes.data;
+
+      if (!payload || !payload.email) {
+        throw new BadRequestException('Token không hợp lệ');
       }
       const { email, name, picture, sub: providerId } = payload;
       const avatarUrl = picture || '';
@@ -174,6 +182,10 @@ export class AuthService {
           user = await this.usersService.createUserFromSocial(name as string, email as string, avatarUrl);
         }
         await this.socialAccountService.createSocialAccount(user, 'GOOGLE', providerId as string);
+      }
+
+      if (!user.is_active) {
+        throw new BadRequestException('Tài khoản đã bị khóa');
       }
 
       return this.buildLoginResponse(user, response);

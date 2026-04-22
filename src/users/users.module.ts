@@ -7,13 +7,15 @@ import { User } from './entities/user.entity';
 import { CartsModule } from '@/carts/carts.module';
 import { RevenuesModule } from '@/revenues/revenues.module';
 import { AddressesModule } from '@/addresses/addresses.module';
+import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]), 
     CartsModule,
     RevenuesModule,
-    AddressesModule
+    AddressesModule,
+    CloudinaryModule
   ],
   controllers: [UsersController],
   providers: [UsersService, DataInitializer],

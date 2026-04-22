@@ -5,7 +5,7 @@ import { Coupon } from './coupon.entity';
 import { Order } from '@/orders/entities/order.entity';
 
 @Entity('coupon_usages')
-@Index('idx_coupon_usage_user', ['user', 'coupon'], { unique: true })
+@Index('idx_coupon_usage_user', ['user', 'coupon'])
 export class CouponUsage {
   @ApiProperty({ example: 1 })
   @PrimaryGeneratedColumn({ type: 'bigint' })

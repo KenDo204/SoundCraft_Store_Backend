@@ -74,7 +74,6 @@ export class SearchService {
     const sanitizedKeyword = this.sanitizeKeyword(keyword);
 
     const qb = this.productRepo.createQueryBuilder('product')
-      .leftJoinAndSelect('product.variants', 'variant')
       .leftJoinAndSelect('product.images', 'image', 'image.is_thumbnail = true') // Chỉ lấy ảnh bìa cho nhẹ
       .where('1=1'); // Dummy where để dễ dàng nối .andWhere()
 
@@ -91,19 +90,19 @@ export class SearchService {
       qb.andWhere('product.category_id = :categoryId', { categoryId });
     }
 
-    // 3. Filter: Khoảng Giá (Dựa trên bảng Variant)
+    // 3. Filter: Khoảng Giá
     if (minPrice !== undefined) {
-      qb.andWhere('variant.price >= :minPrice', { minPrice });
+      qb.andWhere('product.price >= :minPrice', { minPrice });
     }
     if (maxPrice !== undefined) {
-      qb.andWhere('variant.price <= :maxPrice', { maxPrice });
+      qb.andWhere('product.price <= :maxPrice', { maxPrice });
     }
 
     // 4. Sorting
     if (sort === 'price_asc') {
-      qb.orderBy('variant.price', 'ASC');
+      qb.orderBy('product.price', 'ASC');
     } else if (sort === 'price_desc') {
-      qb.orderBy('variant.price', 'DESC');
+      qb.orderBy('product.price', 'DESC');
     } else {
       qb.orderBy('product.created_at', 'DESC'); // 'latest'
     }

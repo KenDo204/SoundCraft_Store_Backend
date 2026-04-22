@@ -2,8 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsArray, ValidateNested, ArrayMinSize, IsNumber, IsEnum, Min } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { CreateProductImageDto } from './products.dto';
-import { CreateProductVariantDto } from './products.dto';
-
 // ==========================================
 // 3. DTO chính cho Sản phẩm (Main DTO)
 // ==========================================
@@ -32,8 +30,15 @@ export class CreateProductDto {
   @IsOptional()
   status?: string = ProductStatus.ACTIVE;
 
-  @ApiPropertyOptional({ description: 'Giá gốc' })
-  @Transform(({ value }) => Number(value)) // Tự động ép chuỗi '50000' thành số 50000
+  @ApiPropertyOptional({ description: 'Giá gốc (chưa giảm)' })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  originalPrice?: number;
+
+  @ApiPropertyOptional({ description: 'Giá bán (nếu có giảm giá hoặc không biến thể)' })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   @Min(0)
   @IsOptional()
@@ -53,18 +58,18 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'Vui lòng cung cấp brandId' })
   brandId: number;
 
+  @ApiPropertyOptional({ description: 'ID của Danh mục' })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @IsOptional()
+  categoryId?: number;
+
   // 🌟 FIX LỖI BOOLEAN: Tự động dịch chuỗi 'true' thành boolean true
   @ApiPropertyOptional({ description: 'Đánh dấu nổi bật' })
   @Transform(({ value }) => value === 'true' || value === true) 
   @IsBoolean()
   @IsOptional()
   inPopular?: boolean;
-
-  // 🌟 FIX LỖI ARRAY: Nhận mảng Biến thể dưới dạng CHUỖI JSON
-  @ApiPropertyOptional({ description: 'Chuỗi JSON chứa phân loại' })
-  @IsString()
-  @IsOptional()
-  variants?: string;
 
   // 🌟 Nhận mảng Ảnh giữ lại (Khi update) dưới dạng CHUỖI JSON
   @ApiPropertyOptional({ description: 'Chuỗi JSON chứa mảng URL ảnh muốn giữ lại' })

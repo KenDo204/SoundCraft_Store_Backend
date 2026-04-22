@@ -18,10 +18,7 @@ export class RecommendationService {
     // Trích xuất ảnh thumbnail
     const thumbnailUrl = product.images?.find(img => img.is_thumbnail)?.image_url || null;
 
-    // Lấy giá thấp nhất từ danh sách biến thể (ví dụ: Guitar size 3/4 thường rẻ hơn 4/4)
-    const minPrice = product.variants?.length > 0
-      ? Math.min(...product.variants.map(v => Number(v.price)))
-      : 0;
+    const minPrice = Number(product.price);
 
     return {
       productId: Number(product.product_id),
@@ -49,7 +46,6 @@ export class RecommendationService {
     // 2. Query sản phẩm cùng brand, loại trừ sản phẩm hiện tại
     const qb = this.productRepo.createQueryBuilder('product')
       .leftJoinAndSelect('product.images', 'image', 'image.is_thumbnail = true')
-      .leftJoinAndSelect('product.variants', 'variant')
       .where('product.product_id != :productId', { productId })
       .andWhere('product.is_stock = :isStock', { isStock: true }); // Chỉ gợi ý hàng còn tồn
 
@@ -74,12 +70,11 @@ export class RecommendationService {
     // Tạm thời fallback: Trả về danh sách nhạc cụ đang nổi bật
     const forYouProducts = await this.productRepo.createQueryBuilder('product')
       .leftJoinAndSelect('product.images', 'image', 'image.is_thumbnail = true')
-      .leftJoinAndSelect('product.variants', 'variant')
       .where('product.in_popular = :isPopular', { isPopular: true })
       .andWhere('product.is_stock = :isStock', { isStock: true })
       // Sắp xếp ngẫu nhiên để user không bị nhàm chán mỗi lần load trang
       .orderBy('RANDOM()') 
-      .take(20)
+      .limit(20) // Sử dụng limit thay vì take để tránh lỗi SELECT DISTINCT của PostgreSQL khi dùng RANDOM()
       .getMany();
 
     return forYouProducts.map(product => this.toRecommendationResponse(product));

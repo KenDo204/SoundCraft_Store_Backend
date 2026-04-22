@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Address } from './entities/address.entity';
-import { User } from '../users/entities/user.entity'; 
+import { User } from '../users/entities/user.entity';
 import { AddressRequestDto } from './dto/address.dto';
 import { GhnService } from '../ghn/ghn.service';
 
@@ -13,21 +13,21 @@ export class AddressService {
     private readonly addressRepository: Repository<Address>,
     private readonly ghnService: GhnService,
     private readonly dataSource: DataSource, // Quản lý Transaction
-  ) {}
+  ) { }
 
   // Lấy danh sách địa chỉ của User
   async getMyAddresses(userId: number): Promise<Address[]> {
     return this.addressRepository.find({
       // Vì khóa ngoại nằm trong relation 'user', ta query thông qua thuộc tính này
-      where: { user: { user_id: userId } }, 
-      order: { is_default: 'DESC', address_id: 'DESC' }, 
+      where: { user: { user_id: userId } },
+      order: { is_default: 'DESC', address_id: 'DESC' },
     });
   }
 
   // Lấy địa chỉ mặc định
   async getDefaultAddress(userId: number): Promise<Address | null> {
-    return this.addressRepository.findOne({ 
-      where: { user: { user_id: userId }, is_default: true } 
+    return this.addressRepository.findOne({
+      where: { user: { user_id: userId }, is_default: true }
     });
   }
 
@@ -38,16 +38,16 @@ export class AddressService {
   // Helper check quyền sở hữu
   private async getAddressAndCheckOwnership(addressId: number, userId: number): Promise<Address> {
     // Phải load thêm relation 'user' để có thể so sánh user_id
-    const address = await this.addressRepository.findOne({ 
+    const address = await this.addressRepository.findOne({
       where: { address_id: addressId },
       relations: ['user'],
-      select: {
-        address_id: true,
-        is_default: true,
-        user: {
-            user_id: true
-        }
-      }
+      // select: {
+      //   address_id: true,
+      //   is_default: true,
+      //   user: {
+      //     user_id: true
+      //   }
+      // }
     });
 
     if (!address) throw new NotFoundException('Không tìm thấy địa chỉ');
@@ -73,10 +73,10 @@ export class AddressService {
 
   // Tạo mới địa chỉ
   async createAddress(userId: number, dto: AddressRequestDto): Promise<Address> {
-    const addressCount = await this.addressRepository.count({ 
-      where: { user: { user_id: userId } } 
+    const addressCount = await this.addressRepository.count({
+      where: { user: { user_id: userId } }
     });
-    
+
     const isFirstAddress = addressCount === 0;
     const shouldBeDefault = isFirstAddress || dto.isDefault;
 
@@ -84,29 +84,28 @@ export class AddressService {
       dto.addressDetail, dto.provinceId, dto.districtId, dto.wardCode
     );
 
+    // Map DTO (camelCase) sang Entity (snake_case)
+    const newAddress = this.addressRepository.create({
+      recipient_name: dto.recipientName,
+      phone: dto.phone,
+      province_id: dto.provinceId,
+      district_id: dto.districtId,
+      ward_code: dto.wardCode,
+      address_detail: dto.addressDetail,
+      address_note: dto.addressNote,
+      full_address: fullAddress,
+      is_default: shouldBeDefault,
+      user: { user_id: userId } as User,
+    });
+
     return await this.dataSource.transaction(async (manager) => {
       if (shouldBeDefault && !isFirstAddress) {
-        // Dùng QueryBuilder để reset tất cả is_default về false cho user này
         await manager.createQueryBuilder()
           .update(Address)
           .set({ is_default: false })
           .where("user_id = :userId", { userId })
           .execute();
       }
-
-      // Map DTO (camelCase) sang Entity (snake_case)
-      const newAddress = manager.create(Address, {
-        recipient_name: dto.recipientName,
-        phone: dto.phone,
-        province_id: dto.provinceId,
-        district_id: dto.districtId,
-        ward_code: dto.wardCode,
-        address_detail: dto.addressDetail,
-        address_note: dto.addressNote,
-        full_address: fullAddress,
-        is_default: shouldBeDefault,
-        user: { user_id: userId } as User, // Gán object User để TypeORM nhận diện khóa ngoại
-      });
 
       return manager.save(newAddress);
     });
@@ -116,7 +115,7 @@ export class AddressService {
   async updateAddress(userId: number, addressId: number, dto: AddressRequestDto): Promise<Address> {
     const address = await this.getAddressAndCheckOwnership(addressId, userId);
 
-    const isLocationChanged = 
+    const isLocationChanged =
       address.province_id !== dto.provinceId ||
       address.district_id !== dto.districtId ||
       address.ward_code !== dto.wardCode ||
@@ -130,7 +129,17 @@ export class AddressService {
     }
 
     return await this.dataSource.transaction(async (manager) => {
-      if (dto.isDefault && !address.is_default) {
+      const addressCount = await manager.count(Address, { where: { user: { user_id: userId } } });
+
+      let finalIsDefault = dto.isDefault ?? address.is_default;
+
+      // Quy tắc: Nếu chỉ có 1 địa chỉ, hoặc địa chỉ này đang là mặc định nhưng bị cập nhật thành không mặc định
+      // (mà chưa có cơ chế chọn cái khác thay thế trong cùng request) -> vẫn giữ là mặc định.
+      if (addressCount === 1 || (address.is_default && finalIsDefault === false)) {
+        finalIsDefault = true;
+      }
+
+      if (finalIsDefault && !address.is_default) {
         await manager.createQueryBuilder()
           .update(Address)
           .set({ is_default: false })
@@ -147,10 +156,7 @@ export class AddressService {
       address.address_detail = dto.addressDetail;
       address.address_note = dto.addressNote;
       address.full_address = newFullAddress;
-      
-      if (dto.isDefault !== undefined) {
-        address.is_default = dto.isDefault;
-      }
+      address.is_default = finalIsDefault;
 
       return manager.save(address);
     });
@@ -164,11 +170,11 @@ export class AddressService {
     await this.dataSource.transaction(async (manager) => {
       // Bỏ default cũ bằng Query Builder
       await manager.createQueryBuilder()
-          .update(Address)
-          .set({ is_default: false })
-          .where("user_id = :userId", { userId })
-          .execute();
-          
+        .update(Address)
+        .set({ is_default: false })
+        .where("user_id = :userId", { userId })
+        .execute();
+
       // Set default mới
       address.is_default = true;
       await manager.save(address);
@@ -188,7 +194,7 @@ export class AddressService {
       if (address.is_default) {
         const remainingAddress = await manager.findOne(Address, {
           where: { user: { user_id: userId } },
-          order: { address_id: 'ASC' }, 
+          order: { address_id: 'ASC' },
         });
 
         if (remainingAddress) {
