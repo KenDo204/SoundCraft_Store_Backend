@@ -63,8 +63,8 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   // Đọc port từ file .env, nếu không có thì chạy port 3000
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
+  const port = process.env.PORT || 8080;
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 Server đang chạy tại: http://localhost:${port}/api/v1`);
   console.log(`📑 Xem tài liệu Swagger tại: http://localhost:${port}/api/docs`);
 }
