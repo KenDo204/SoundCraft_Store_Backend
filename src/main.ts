@@ -10,10 +10,9 @@ async function bootstrap() {
   // Mở CORS để Frontend (ReactJS) gọi API không bị lỗi
   app.enableCors({
     origin: [
-      'http://localhost:3000', // React mặc định
       'http://localhost:5173', // Vite mặc định
       'http://localhost:8080', // Spring cũ/Cổng khác
-      //'https://shop-me2-0-fe.vercel.app', // Domain production của bạn
+      'https://sound-craft-store-frontend.vercel.app', // Domain production của bạn
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true, // Cho phép gửi Cookie/Authorization Header
