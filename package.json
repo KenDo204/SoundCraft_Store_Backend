@@ -17,9 +17,16 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "doc:gen": "npx compodoc -p tsconfig.json -s"
   },
   "dependencies": {
+    "@angular/common": "^21.2.10",
+    "@angular/compiler": "^21.2.10",
+    "@angular/core": "^21.2.10",
+    "@angular/forms": "^21.2.10",
+    "@angular/platform-browser": "^21.2.10",
+    "@angular/platform-browser-dynamic": "^21.2.10",
     "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.1.0",
@@ -57,6 +64,7 @@
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.2.1",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",

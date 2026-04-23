@@ -1,0 +1,1075 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>soundcraft-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+          <script>
+              // --- Iframe navigation tracking for Template Playground ---
+              function sendCurrentUrlToParent() {
+                  if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({
+                          type: 'compodoc-iframe-navigate',
+                          url: window.location.pathname + window.location.hash
+                      }, '*');
+                  }
+              }
+              window.addEventListener('hashchange', sendCurrentUrlToParent, false);
+              window.addEventListener('popstate', sendCurrentUrlToParent, false);
+              window.addEventListener('DOMContentLoaded', sendCurrentUrlToParent, false);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">soundcraft-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >CouponsService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/coupons/coupons.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#applyCouponPreview" >applyCouponPreview</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#commitCouponUsages" >commitCouponUsages</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#createCoupon" >createCoupon</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getAllCoupons" >getAllCoupons</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getAvailableCoupons" >getAvailableCoupons</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#toggleActive" >toggleActive</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                <a href="#validateCouponConstraints" >validateCouponConstraints</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#validateCouponForApply" >validateCouponForApply</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(couponRepo: <a href="../entitys/Coupon.html" target="_self">Repository&lt;Coupon&gt;</a>, usageRepo: <a href="../classes/CouponUsage.html" target="_self">Repository&lt;CouponUsage&gt;</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/coupons/coupons.service.ts:11</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>couponRepo</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../entitys/Coupon.html" target="_self" >Repository&lt;Coupon&gt;</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>usageRepo</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../classes/CouponUsage.html" target="_self" >Repository&lt;CouponUsage&gt;</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="applyCouponPreview"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>applyCouponPreview</b></span>
+                        <a href="#applyCouponPreview"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>applyCouponPreview(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/ApplyCouponPreviewDto.html" target="_self">ApplyCouponPreviewDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="70"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:70</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>USER: Xem trước mức giảm giá (Giỏ hàng)</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/ApplyCouponPreviewDto.html" target="_self" >ApplyCouponPreviewDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="commitCouponUsages"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>commitCouponUsages</b></span>
+                        <a href="#commitCouponUsages"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>commitCouponUsages(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/CommitCouponUsageDto.html" target="_self">CommitCouponUsageDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:97</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>USER: Chốt mã giảm giá (Sau khi thanh toán thành công)</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CommitCouponUsageDto.html" target="_self" >CommitCouponUsageDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createCoupon"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createCoupon</b></span>
+                        <a href="#createCoupon"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createCoupon(dto: <a href="../classes/CreateCouponDto.html" target="_self">CreateCouponDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="19"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:19</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>ADMIN: Tạo mã giảm giá</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateCouponDto.html" target="_self" >CreateCouponDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../entitys/Coupon.html" target="_self" >Promise&lt;Coupon&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getAllCoupons"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getAllCoupons</b></span>
+                        <a href="#getAllCoupons"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getAllCoupons()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:141</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getAvailableCoupons"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getAvailableCoupons</b></span>
+                        <a href="#getAvailableCoupons"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getAvailableCoupons()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="146"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:146</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="toggleActive"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>toggleActive</b></span>
+                        <a href="#toggleActive"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>toggleActive(couponId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="173"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:173</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>couponId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="validateCouponConstraints"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                        <span ><b>validateCouponConstraints</b></span>
+                        <a href="#validateCouponConstraints"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>validateCouponConstraints(dto: <a href="../entitys/Coupon.html" target="_self">CreateCouponDto | Partial&lt;CreateCouponDto&gt;</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="43"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:43</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Tính toán Logic dùng chung</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../entitys/Coupon.html" target="_self" >CreateCouponDto | Partial&lt;CreateCouponDto&gt;</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="validateCouponForApply"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>validateCouponForApply</b></span>
+                        <a href="#validateCouponForApply"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>validateCouponForApply(rawCode: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">src/coupons/coupons.service.ts:113</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>rawCode</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../entitys/Coupon.html" target="_self" >Promise&lt;Coupon&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, BadRequestException, NotFoundException, ConflictException } from &#x27;@nestjs/common&#x27;;
+import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
+import { Repository, MoreThanOrEqual } from &#x27;typeorm&#x27;;
+import { Coupon } from &#x27;./entities/coupon.entity&#x27;;
+import { DiscountType } from &#x27;./enums/coupon-discount.enum&#x27;;
+import { CouponUsage } from &#x27;./entities/coupon-usage.entity&#x27;;
+import { CreateCouponDto, ApplyCouponPreviewDto, CommitCouponUsageDto } from &#x27;./dto/coupons.dto&#x27;;
+import { User } from &#x27;../users/entities/user.entity&#x27;;
+
+@Injectable()
+export class CouponsService {
+  constructor(
+    @InjectRepository(Coupon) private couponRepo: Repository&lt;Coupon&gt;,
+    @InjectRepository(CouponUsage) private usageRepo: Repository&lt;CouponUsage&gt;,
+  ) {}
+
+  /** * ADMIN: Tạo mã giảm giá 
+   */
+  async createCoupon(dto: CreateCouponDto): Promise&lt;Coupon&gt; {
+    this.validateCouponConstraints(dto);
+
+    const existing &#x3D; await this.couponRepo.findOne({ where: { code: dto.code } });
+    if (existing) throw new ConflictException(&#x27;Mã giảm giá đã tồn tại.&#x27;);
+
+    const coupon &#x3D; this.couponRepo.create({
+      code: dto.code,
+      discount_type: dto.discountType,
+      discount_value: dto.discountValue,
+      min_order_amount: dto.minOrderAmount,
+      max_discount_amount: dto.maxDiscountAmount,
+      max_usage: dto.maxUsage,
+      max_usage_per_user: dto.maxUsagePerUser || 1,
+      start_date: new Date(dto.startDate),
+      end_date: new Date(dto.endDate),
+    });
+
+    return await this.couponRepo.save(coupon);
+  }
+
+  /**
+   * Tính toán Logic dùng chung
+   */
+  private validateCouponConstraints(dto: CreateCouponDto | Partial&lt;CreateCouponDto&gt;) {
+    if (dto.discountType &#x3D;&#x3D;&#x3D; DiscountType.FIXED) {
+      if (Number(dto.discountValue) &gt;&#x3D; Number(dto.minOrderAmount)) {
+        throw new BadRequestException(&#x27;Giảm cố định: Số tiền giảm phải nhỏ hơn giá trị đơn hàng tối thiểu.&#x27;);
+      }
+    } else if (dto.discountType &#x3D;&#x3D;&#x3D; DiscountType.PERCENT) {
+      if (Number(dto.discountValue) &lt; 1 || Number(dto.discountValue) &gt; 100) {
+        throw new BadRequestException(&#x27;Giảm phần trăm: Giá trị phải từ 1 đến 100.&#x27;);
+      }
+      if (!dto.maxDiscountAmount) {
+        throw new BadRequestException(&#x27;Giảm phần trăm: Bắt buộc phải nhập Số tiền giảm tối đa (maxDiscountAmount).&#x27;);
+      }
+    }
+
+    if (dto.startDate &amp;&amp; dto.endDate) {
+      const start &#x3D; new Date(dto.startDate);
+      const end &#x3D; new Date(dto.endDate);
+      if (start &lt; new Date()) throw new BadRequestException(&#x27;Ngày bắt đầu không được trong quá khứ.&#x27;);
+      if (end &lt;&#x3D; new Date(start.getTime() + 60 * 60 * 1000)) {
+        throw new BadRequestException(&#x27;Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 giờ.&#x27;);
+      }
+    }
+  }
+
+  /**
+   * USER: Xem trước mức giảm giá (Giỏ hàng)
+   */
+  async applyCouponPreview(userId: number, dto: ApplyCouponPreviewDto) {
+    const coupon &#x3D; await this.validateCouponForApply(dto.couponCode, userId);
+
+    if (Number(dto.totalCartAmount) &lt; Number(coupon.min_order_amount)) {
+      throw new BadRequestException(&#x60;Đơn hàng chưa đạt mức tối thiểu ${coupon.min_order_amount}đ để dùng mã này.&#x60;);
+    }
+
+    let discountAmount &#x3D; 0;
+    if (coupon.discount_type &#x3D;&#x3D;&#x3D; DiscountType.FIXED) {
+      discountAmount &#x3D; Math.min(Number(coupon.discount_value), Number(dto.totalCartAmount));
+    } else {
+      // Logic: (Tổng tiền * phần trăm) nhưng không vượt quá max_discount_amount
+      const rawDiscount &#x3D; (Number(dto.totalCartAmount) * Number(coupon.discount_value)) / 100;
+      discountAmount &#x3D; Math.min(rawDiscount, Number(coupon.max_discount_amount));
+    }
+
+    return {
+      totalCartAmount: Number(dto.totalCartAmount),
+      discountAmount,
+      finalTotal: Number(dto.totalCartAmount) - discountAmount,
+      couponCode: coupon.code,
+    };
+  }
+
+  /**
+   * USER: Chốt mã giảm giá (Sau khi thanh toán thành công)
+   */
+  async commitCouponUsages(userId: number, dto: CommitCouponUsageDto): Promise&lt;void&gt; {
+    const uniqueCodes &#x3D; [...new Set(dto.couponCodes.map(c &#x3D;&gt; c.trim().toUpperCase()))];
+
+    for (const code of uniqueCodes) {
+      const coupon &#x3D; await this.validateCouponForApply(code, userId);
+
+      const usage &#x3D; this.usageRepo.create({
+        coupon: { coupon_id: coupon.coupon_id } as any,
+        user: { user_id: userId } as any,
+        order: { order_id: dto.orderId } as any,
+      });
+
+      await this.usageRepo.save(usage);
+    }
+  }
+
+  private async validateCouponForApply(rawCode: string, userId: number): Promise&lt;Coupon&gt; {
+    const code &#x3D; rawCode.trim().toUpperCase();
+    const coupon &#x3D; await this.couponRepo.findOne({ where: { code, is_active: true } });
+
+    if (!coupon) throw new NotFoundException(&#x27;Mã giảm giá không tồn tại hoặc đã bị khóa.&#x27;);
+
+    const now &#x3D; new Date();
+    if (now &lt; new Date(coupon.start_date) || now &gt; new Date(coupon.end_date)) {
+      throw new BadRequestException(&#x27;Mã giảm giá đã hết hạn hoặc chưa đến thời gian sử dụng.&#x27;);
+    }
+
+    const usedCount &#x3D; await this.usageRepo.count({ where: { coupon: { coupon_id: coupon.coupon_id } } });
+    if (usedCount &gt;&#x3D; coupon.max_usage) {
+      throw new BadRequestException(&#x27;Mã giảm giá đã hết lượt sử dụng trên toàn hệ thống.&#x27;);
+    }
+
+    const userUsedCount &#x3D; await this.usageRepo.count({ 
+      where: { user: { user_id: userId }, coupon: { coupon_id: coupon.coupon_id } } 
+    });
+    
+    if (userUsedCount &gt;&#x3D; coupon.max_usage_per_user) {
+      throw new BadRequestException(&#x60;Bạn đã hết lượt sử dụng mã giảm giá này (Tối đa ${coupon.max_usage_per_user} lần/người).&#x60;);
+    }
+
+    return coupon;
+  }
+
+  // --- Các hàm Admin cơ bản ---
+  async getAllCoupons() { 
+    return await this.couponRepo.find({ order: { created_at: &#x27;DESC&#x27; } }); 
+  }
+
+  // --- Lấy danh sách Coupon còn hiệu lực cho User ---
+  async getAvailableCoupons() {
+    const now &#x3D; new Date();
+    
+    // Lấy các coupon đang ACTIVE và còn trong khung giờ có hiệu lực
+    const queryBuilder &#x3D; this.couponRepo.createQueryBuilder(&#x27;coupon&#x27;);
+    queryBuilder.where(&#x27;coupon.is_active &#x3D; :isActive&#x27;, { isActive: true })
+      .andWhere(&#x27;coupon.start_date &lt;&#x3D; :now&#x27;, { now })
+      .andWhere(&#x27;coupon.end_date &gt;&#x3D; :now&#x27;, { now })
+      .orderBy(&#x27;coupon.discount_value&#x27;, &#x27;DESC&#x27;);
+      
+    const availableCoupons &#x3D; await queryBuilder.getMany();
+    
+    // Loại bỏ các coupon đã hết lượt dùng chung
+    const validCoupons: any[] &#x3D; [];
+    for (const coupon of availableCoupons) {
+      const usedCount &#x3D; await this.usageRepo.count({ where: { coupon: { coupon_id: coupon.coupon_id } } });
+      if (usedCount &lt; coupon.max_usage) {
+        validCoupons.push({
+          ...coupon,
+          current_usage: usedCount
+        });
+      }
+    }
+    
+    return validCoupons;
+  }
+  
+  async toggleActive(couponId: number) {
+    const coupon &#x3D; await this.couponRepo.findOne({ where: { coupon_id: couponId } });
+    if (!coupon) throw new NotFoundException();
+    coupon.is_active &#x3D; !coupon.is_active;
+    return await this.couponRepo.save(coupon);
+  }
+}</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'CouponsService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

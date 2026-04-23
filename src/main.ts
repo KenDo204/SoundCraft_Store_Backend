@@ -5,7 +5,9 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    snapshot: true, // 🌟 Quan trọng nhất là dòng này
+  });
 
   // Mở CORS để Frontend (ReactJS) gọi API không bị lỗi
   app.enableCors({

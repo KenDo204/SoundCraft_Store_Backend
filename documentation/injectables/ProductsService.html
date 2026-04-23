@@ -1,0 +1,1358 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>soundcraft-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+          <script>
+              // --- Iframe navigation tracking for Template Playground ---
+              function sendCurrentUrlToParent() {
+                  if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({
+                          type: 'compodoc-iframe-navigate',
+                          url: window.location.pathname + window.location.hash
+                      }, '*');
+                  }
+              }
+              window.addEventListener('hashchange', sendCurrentUrlToParent, false);
+              window.addEventListener('popstate', sendCurrentUrlToParent, false);
+              window.addEventListener('DOMContentLoaded', sendCurrentUrlToParent, false);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">soundcraft-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >ProductsService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/products/products.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#createProduct" >createProduct</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#deleteProduct" >deleteProduct</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getNewArrivals" >getNewArrivals</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getProductById" >getProductById</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getProducts" >getProducts</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#releaseStock" >releaseStock</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#updateProduct" >updateProduct</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(productRepo: <a href="../entitys/Product.html" target="_self">Repository&lt;Product&gt;</a>, imageRepo: Repository<ProductImage>, dataSource: DataSource, cloudinaryService: <a href="../injectables/CloudinaryService.html" target="_self">CloudinaryService</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/products/products.service.ts:10</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>productRepo</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../entitys/Product.html" target="_self" >Repository&lt;Product&gt;</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>imageRepo</td>
+                                                  
+                                                        <td>
+                                                                    <code>Repository&lt;ProductImage&gt;</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dataSource</td>
+                                                  
+                                                        <td>
+                                                                    <code>DataSource</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>cloudinaryService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/CloudinaryService.html" target="_self" >CloudinaryService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createProduct"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createProduct</b></span>
+                        <a href="#createProduct"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createProduct(dto: <a href="../classes/CreateProductDto.html" target="_self">CreateProductDto</a>, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="27"
+                                    class="link-to-prism">src/products/products.service.ts:27</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateProductDto.html" target="_self" >CreateProductDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>thumbnailFile</td>
+                                            <td>
+                                                        <code>Express.Multer.File | null</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>galleryFiles</td>
+                                            <td>
+                                                        <code>Express.Multer.File[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../entitys/Product.html" target="_self" >Promise&lt;Product&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="deleteProduct"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>deleteProduct</b></span>
+                        <a href="#deleteProduct"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>deleteProduct(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="369"
+                                    class="link-to-prism">src/products/products.service.ts:369</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getNewArrivals"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getNewArrivals</b></span>
+                        <a href="#getNewArrivals"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getNewArrivals(query: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="230"
+                                    class="link-to-prism">src/products/products.service.ts:230</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Default value</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>query</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+                                            <td>
+                                                    <code>{}</code>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getProductById"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getProductById</b></span>
+                        <a href="#getProductById"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProductById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="356"
+                                    class="link-to-prism">src/products/products.service.ts:356</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../entitys/Product.html" target="_self" >Promise&lt;Product&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getProducts"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getProducts</b></span>
+                        <a href="#getProducts"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProducts(query: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="276"
+                                    class="link-to-prism">src/products/products.service.ts:276</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>query</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="releaseStock"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>releaseStock</b></span>
+                        <a href="#releaseStock"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>releaseStock(params: literal type, queryRunner: QueryRunner)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="400"
+                                    class="link-to-prism">src/products/products.service.ts:400</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>queryRunner</td>
+                                            <td>
+                                                        <code>QueryRunner</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updateProduct"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>updateProduct</b></span>
+                        <a href="#updateProduct"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateProduct(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/CreateProductDto.html" target="_self">CreateProductDto</a>, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">src/products/products.service.ts:90</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateProductDto.html" target="_self" >CreateProductDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>thumbnailFile</td>
+                                            <td>
+                                                        <code>Express.Multer.File | null</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>galleryFiles</td>
+                                            <td>
+                                                        <code>Express.Multer.File[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../entitys/Product.html" target="_self" >Promise&lt;Product&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, NotFoundException, BadRequestException } from &#x27;@nestjs/common&#x27;;
+import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
+import { Repository, DataSource, QueryRunner } from &#x27;typeorm&#x27;;
+import { Product } from &#x27;./entities/product.entity&#x27;;
+import { ProductImage } from &#x27;./entities/product-image.entity&#x27;;
+import { CreateProductDto } from &#x27;./dto/create-product.dto&#x27;;
+import { CloudinaryService } from &#x27;../cloudinary/cloudinary.service&#x27;;
+
+@Injectable()
+export class ProductsService {
+  constructor(
+    @InjectRepository(Product) private productRepo: Repository&lt;Product&gt;,
+    @InjectRepository(ProductImage) private imageRepo: Repository&lt;ProductImage&gt;,
+    private dataSource: DataSource,
+    private cloudinaryService: CloudinaryService,
+  ) { }
+
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  // HELPERS
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+
+
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  // API TẠO MỚI (CREATE)
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  async createProduct(dto: CreateProductDto, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[]): Promise&lt;Product&gt; {
+    if (!thumbnailFile) throw new BadRequestException(&#x27;Bắt buộc phải tải lên ảnh đại diện (thumbnail)&#x27;);
+
+    const originalPrice &#x3D; Number(dto.originalPrice) || 0;
+    const inputPrice &#x3D; Number(dto.price) || originalPrice; // Mặc định giá bán &#x3D; giá gốc nếu không nhập
+
+    // Ràng buộc kỹ thuật: Giá bán không được lớn hơn giá gốc
+    if (inputPrice &gt; originalPrice) {
+      throw new BadRequestException(&#x60;Giá bán (${inputPrice}) không được lớn hơn giá gốc (${originalPrice})&#x60;);
+    }
+
+    const totalStock &#x3D; dto.stockQuantity || 0;
+    const basePrice &#x3D; inputPrice;
+    const isStock &#x3D; totalStock &gt; 0;
+    // 1. Upload ảnh lên Cloudinary
+    const thumbUpload &#x3D; await this.cloudinaryService.uploadImageProducts(thumbnailFile);
+    const thumbnailUrl &#x3D; thumbUpload.secure_url;
+
+    const galleryUrls: string[] &#x3D; [];
+    if (galleryFiles &amp;&amp; galleryFiles.length &gt; 0) {
+      const uploadPromises &#x3D; galleryFiles.map(file &#x3D;&gt; this.cloudinaryService.uploadImageProducts(file));
+      const results &#x3D; await Promise.all(uploadPromises);
+      galleryUrls.push(...results.map(r &#x3D;&gt; r.secure_url));
+    }
+
+
+
+    return this.dataSource.transaction(async (manager) &#x3D;&gt; {
+      // 2. Tạo Product
+      const product &#x3D; manager.create(Product, {
+        product_name: dto.productName,
+        slug: dto.slug,
+        product_description: dto.productDescription,
+        status: dto.status || &#x27;ACTIVE&#x27;,
+        price: basePrice,
+        original_price: Number(dto.originalPrice) || 0,
+        stock_quantity: totalStock,
+        is_stock: isStock,
+        in_popular: dto.inPopular || false,
+        brand: dto.brandId ? { brand_id: dto.brandId } as any : null,
+        category: dto.categoryId ? { category_id: dto.categoryId } as any : null,
+      });
+      const savedProduct &#x3D; await manager.save(product);
+
+      // 3. Lưu mảng Hình ảnh vào DB
+      const imageEntities &#x3D; [
+        manager.create(ProductImage, { image_url: thumbnailUrl, is_thumbnail: true, product: savedProduct }),
+        ...galleryUrls.map(url &#x3D;&gt; manager.create(ProductImage, { image_url: url, is_thumbnail: false, product: savedProduct }))
+      ];
+      await manager.save(imageEntities);
+
+
+
+      return manager.findOneOrFail(Product, {
+        where: { product_id: savedProduct.product_id },
+        relations: [&#x27;brand&#x27;, &#x27;category&#x27;, &#x27;images&#x27;]
+      });
+    });
+  }
+
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  // API CẬP NHẬT (UPDATE)
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  async updateProduct(id: number, dto: CreateProductDto, thumbnailFile: Express.Multer.File | null, galleryFiles: Express.Multer.File[]): Promise&lt;Product&gt; {
+    const existingProduct &#x3D; await this.productRepo.findOne({
+      where: { product_id: id },
+      relations: [&#x27;images&#x27;, &#x27;brand&#x27;, &#x27;category&#x27;]
+    });
+    if (!existingProduct) throw new NotFoundException(&#x27;Không tìm thấy sản phẩm&#x27;);
+
+    const originalPrice &#x3D; dto.originalPrice ? Number(dto.originalPrice) : Number(existingProduct.original_price);
+    const inputPrice &#x3D; dto.price ? Number(dto.price) : (dto.originalPrice ? originalPrice : Number(existingProduct.price));
+
+    // Ràng buộc kỹ thuật: Giá bán không được lớn hơn giá gốc
+    if (inputPrice &gt; originalPrice) {
+      throw new BadRequestException(&#x60;Giá bán (${inputPrice}) không được lớn hơn giá gốc (${originalPrice})&#x60;);
+    }
+
+    const totalStock &#x3D; dto.stockQuantity || 0;
+    const basePrice &#x3D; inputPrice;
+    const isStock &#x3D; totalStock &gt; 0;
+    // XỬ LÝ ẢNH &amp; TÌM ẢNH BỊ XÓA (Garbage Collection)
+    const oldImageUrls &#x3D; existingProduct.images.map(img &#x3D;&gt; img.image_url);
+
+    // Xử lý retainedImagesJson (Frontend gửi mảng ID ảnh cũ muốn giữ lại)
+    const hasRetainedImages &#x3D; dto.retainedImagesJson !&#x3D;&#x3D; undefined &amp;&amp; dto.retainedImagesJson !&#x3D;&#x3D; null;
+    const retainedIds: number[] &#x3D; hasRetainedImages 
+      ? (typeof dto.retainedImagesJson &#x3D;&#x3D;&#x3D; &#x27;string&#x27; ? JSON.parse(dto.retainedImagesJson) : dto.retainedImagesJson) 
+      : existingProduct.images.map(img &#x3D;&gt; img.image_id);
+    
+    // Xác định các ảnh cần xóa trên Cloudinary
+    const imagesToDeleteFromCloudinary &#x3D; existingProduct.images
+      .filter(img &#x3D;&gt; {
+        if (img.is_thumbnail) {
+          return !!thumbnailFile; // Chỉ xóa thumbnail cũ nếu có thumbnail mới thay thế
+        }
+        return !retainedIds.map(id &#x3D;&gt; Number(id)).includes(Number(img.image_id));
+      })
+      .map(img &#x3D;&gt; img.image_url);
+
+    // Upload Thumbnail MỚI (nếu có)
+    let finalThumbnailUrl &#x3D; existingProduct.images.find(img &#x3D;&gt; img.is_thumbnail)?.image_url;
+    if (thumbnailFile) {
+      const thumbUpload &#x3D; await this.cloudinaryService.uploadImageProducts(thumbnailFile);
+      finalThumbnailUrl &#x3D; thumbUpload.secure_url;
+
+      const oldThumb &#x3D; existingProduct.images.find(img &#x3D;&gt; img.is_thumbnail);
+      if (oldThumb &amp;&amp; !imagesToDeleteFromCloudinary.includes(oldThumb.image_url)) {
+        imagesToDeleteFromCloudinary.push(oldThumb.image_url);
+      }
+    }
+
+    // Upload Gallery MỚI (nếu có)
+    const newGalleryUrls: string[] &#x3D; [];
+    if (galleryFiles &amp;&amp; galleryFiles.length &gt; 0) {
+      const uploadPromises &#x3D; galleryFiles.map(file &#x3D;&gt; this.cloudinaryService.uploadImageProducts(file));
+      const results &#x3D; await Promise.all(uploadPromises);
+      newGalleryUrls.push(...results.map(r &#x3D;&gt; r.secure_url));
+    }
+
+    return this.dataSource.transaction(async (manager) &#x3D;&gt; {
+      // 1. Cập nhật thông tin gốc
+      Object.assign(existingProduct, {
+        product_name: dto.productName,
+        slug: dto.slug,
+        product_description: dto.productDescription,
+        status: dto.status,
+        in_popular: dto.inPopular,
+        price: basePrice,
+        original_price: dto.originalPrice ? Number(dto.originalPrice) : existingProduct.original_price,
+        stock_quantity: totalStock,
+        is_stock: isStock,
+        brand: dto.brandId ? ({ brand_id: dto.brandId } as any) : existingProduct.brand,
+        category: dto.categoryId ? ({ category_id: dto.categoryId } as any) : existingProduct.category,
+      });
+      const savedProduct &#x3D; await manager.save(existingProduct);
+
+      // 2. Xử lý Hình ảnh (TỐI ƯU: Chỉ xóa ảnh không dùng, giữ lại ảnh cũ)
+      const imageEntitiesToDelete &#x3D; existingProduct.images.filter(img &#x3D;&gt; {
+        // Nếu là thumbnail: Chỉ xóa nếu có thumbnail mới thay thế (thumbnailFile tồn tại)
+        if (img.is_thumbnail) {
+          return !!thumbnailFile;
+        }
+        // Nếu là ảnh gallery: Xóa nếu không nằm trong danh sách giữ lại
+        return !retainedIds.map(id &#x3D;&gt; Number(id)).includes(Number(img.image_id));
+      });
+
+      if (imageEntitiesToDelete.length &gt; 0) {
+        const idsToDelete &#x3D; imageEntitiesToDelete.map(img &#x3D;&gt; img.image_id);
+        await manager.delete(ProductImage, idsToDelete);
+        
+        // Thêm vào danh sách xóa trên Cloudinary
+        imageEntitiesToDelete.forEach(img &#x3D;&gt; {
+          if (!imagesToDeleteFromCloudinary.includes(img.image_url)) {
+            imagesToDeleteFromCloudinary.push(img.image_url);
+          }
+        });
+      }
+
+      const newImageEntities: ProductImage[] &#x3D; [];
+      if (thumbnailFile) {
+        newImageEntities.push(manager.create(ProductImage, {
+          image_url: finalThumbnailUrl,
+          is_thumbnail: true,
+          product: savedProduct
+        }));
+      }
+      if (newGalleryUrls.length &gt; 0) {
+        newGalleryUrls.forEach(url &#x3D;&gt; {
+          newImageEntities.push(manager.create(ProductImage, {
+            image_url: url,
+            is_thumbnail: false,
+            product: savedProduct
+          }));
+        });
+      }
+      if (newImageEntities.length &gt; 0) {
+        await manager.save(newImageEntities);
+      }
+
+
+      // 4. 🌟 GỌI HÀM CLOUDINARY ĐỂ DỌN RÁC
+      if (imagesToDeleteFromCloudinary.length &gt; 0) {
+        imagesToDeleteFromCloudinary.forEach(async (url) &#x3D;&gt; {
+          const publicId &#x3D; this.cloudinaryService.extractPublicId(url);
+          if (publicId) {
+            await this.cloudinaryService.deleteImage(publicId).catch((err) &#x3D;&gt; {
+              console.error(&#x60;[CẢNH BÁO] Lỗi xóa ảnh Cloudinary: ${publicId}&#x60;, err);
+            });
+          }
+        });
+      }
+
+      return manager.findOneOrFail(Product, {
+        where: { product_id: id },
+        relations: [&#x27;brand&#x27;, &#x27;category&#x27;, &#x27;images&#x27;]
+      });
+    });
+  }
+
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  // API TRUY VẤN VÀ XÓA
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+  async getNewArrivals(query: any &#x3D; {}): Promise&lt;{ items: Product[]; meta: any }&gt; {
+    const page &#x3D; query.page ? Number(query.page) : 1;
+    const limit &#x3D; query.limit ? Number(query.limit) : 12; // Mặc định là 12 theo yêu cầu của user
+    const skip &#x3D; (page - 1) * limit;
+
+    const { tags, brandId, categoryId, slug, priceMin, priceMax } &#x3D; query;
+
+    const qb &#x3D; this.productRepo.createQueryBuilder(&#x27;product&#x27;)
+      .leftJoinAndSelect(&#x27;product.images&#x27;, &#x27;images&#x27;)
+      .leftJoinAndSelect(&#x27;product.brand&#x27;, &#x27;brand&#x27;)
+      .leftJoinAndSelect(&#x27;product.category&#x27;, &#x27;category&#x27;)
+      .where(&#x27;product.status &#x3D; :status&#x27;, { status: &#x27;ACTIVE&#x27; });
+
+    // Hỗ trợ lọc nâng cao cho hàng mới về
+    if (brandId) qb.andWhere(&#x27;product.brand_id &#x3D; :brandId&#x27;, { brandId: Number(brandId) });
+    if (categoryId) qb.andWhere(&#x27;product.category_id &#x3D; :categoryId&#x27;, { categoryId: Number(categoryId) });
+    if (slug) qb.andWhere(&#x27;(brand.slug &#x3D; :slug OR category.slug &#x3D; :slug)&#x27;, { slug });
+    if (priceMin) qb.andWhere(&#x27;product.price &gt;&#x3D; :priceMin&#x27;, { priceMin: Number(priceMin) });
+    if (priceMax) qb.andWhere(&#x27;product.price &lt;&#x3D; :priceMax&#x27;, { priceMax: Number(priceMax) });
+
+    // Lọc theo Danh mục/Tags
+    if (tags) {
+      const decodedTag &#x3D; decodeURIComponent(tags);
+      qb.andWhere(&#x27;category.name &#x3D; :tag&#x27;, { tag: decodedTag });
+    }
+
+    // Luôn sắp xếp giảm dần theo ngày tạo (Hàng mới nhất)
+    qb.orderBy(&#x27;product.created_at&#x27;, &#x27;DESC&#x27;);
+
+    // Phân trang
+    qb.skip(skip).take(limit);
+
+    // Lấy dữ liệu và tổng số bản ghi thỏa mãn điều kiện
+    const [items, totalElements] &#x3D; await qb.getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
+  }
+
+  async getProducts(query: any): Promise&lt;{ items: Product[]; meta: any }&gt; {
+    // 1. Trích xuất các tham số từ query
+    const page &#x3D; query.page ? Number(query.page) : 1;
+    const limit &#x3D; query.limit ? Number(query.limit) : 10;
+    const skip &#x3D; (page - 1) * limit;
+
+    const { keyword, brandId, categoryId, slug, priceMin, priceMax, inStock, color, isPopular, tags } &#x3D; query;
+
+    // 2. Khởi tạo QueryBuilder
+    const qb &#x3D; this.productRepo.createQueryBuilder(&#x27;product&#x27;)
+      .leftJoinAndSelect(&#x27;product.brand&#x27;, &#x27;brand&#x27;)
+      .leftJoinAndSelect(&#x27;product.category&#x27;, &#x27;category&#x27;)
+      .leftJoinAndSelect(&#x27;product.images&#x27;, &#x27;images&#x27;);
+
+    // 3. Nối các điều kiện lọc (Dynamically Add WHERE Clauses)
+
+    if (keyword) {
+      qb.andWhere(&#x27;product.product_name LIKE :keyword&#x27;, { keyword: &#x60;%${keyword}%&#x60; });
+    }
+
+    if (isPopular !&#x3D;&#x3D; undefined) {
+      // Ép kiểu vì URL gửi lên là dạng chuỗi &#x27;true&#x27; hoặc &#x27;false&#x27;
+      const isPop &#x3D; isPopular &#x3D;&#x3D;&#x3D; &#x27;true&#x27; || isPopular &#x3D;&#x3D;&#x3D; true;
+      qb.andWhere(&#x27;product.in_popular &#x3D; :isPop&#x27;, { isPop });
+    }
+
+    if (brandId) {
+      qb.andWhere(&#x27;product.brand_id &#x3D; :brandId&#x27;, { brandId: Number(brandId) });
+    }
+
+    if (categoryId) {
+      qb.andWhere(&#x27;product.category_id &#x3D; :categoryId&#x27;, { categoryId: Number(categoryId) });
+    }
+
+    if (slug) {
+      qb.andWhere(&#x27;(brand.slug &#x3D; :slug OR category.slug &#x3D; :slug)&#x27;, { slug });
+    }
+
+    if (tags) {
+      // Tags ở đây ta quy ước là lọc theo Tên danh mục (Category Name)
+      qb.andWhere(&#x27;category.name &#x3D; :tags&#x27;, { tags });
+    }
+
+    if (priceMin) {
+      qb.andWhere(&#x27;product.price &gt;&#x3D; :priceMin&#x27;, { priceMin: Number(priceMin) });
+    }
+
+    if (priceMax) {
+      qb.andWhere(&#x27;product.price &lt;&#x3D; :priceMax&#x27;, { priceMax: Number(priceMax) });
+    }
+
+    if (inStock !&#x3D;&#x3D; undefined &amp;&amp; inStock !&#x3D;&#x3D; null) {
+      if (inStock &#x3D;&#x3D;&#x3D; &#x27;true&#x27; || inStock &#x3D;&#x3D;&#x3D; true) {
+        qb.andWhere(&#x27;product.is_stock &#x3D; :inStock&#x27;, { inStock: true });
+        // Hoặc: qb.andWhere(&#x27;product.stock_quantity &gt; 0&#x27;);
+      } else if (inStock &#x3D;&#x3D;&#x3D; &#x27;false&#x27; || inStock &#x3D;&#x3D;&#x3D; false) {
+        qb.andWhere(&#x27;product.is_stock &#x3D; :inStock&#x27;, { inStock: false });
+        // Hoặc: qb.andWhere(&#x27;product.stock_quantity &lt;&#x3D; 0&#x27;);
+      }
+    }
+
+    // 4. Thực thi Query (Order, Pagination)
+    qb.orderBy(&#x27;product.created_at&#x27;, &#x27;DESC&#x27;);
+    qb.skip(skip).take(limit);
+
+    // Lấy dữ liệu và tổng số bản ghi thỏa mãn điều kiện
+    const [items, totalElements] &#x3D; await qb.getManyAndCount();
+
+    // 5. Trả về format chuẩn
+    return {
+      items,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
+  }
+
+  async getProductById(id: number): Promise&lt;Product&gt; {
+    const product &#x3D; await this.productRepo.findOne({
+      where: { product_id: id },
+      relations: [&#x27;brand&#x27;, &#x27;category&#x27;, &#x27;images&#x27;],
+      order: {
+        images: { is_thumbnail: &#x27;DESC&#x27;, image_id: &#x27;ASC&#x27; },
+      }
+    });
+
+    if (!product) throw new NotFoundException(&#x27;Không tìm thấy sản phẩm&#x27;);
+    return product;
+  }
+
+  async deleteProduct(id: number) {
+    const product &#x3D; await this.productRepo.findOne({
+      where: { product_id: id },
+      relations: [&#x27;images&#x27;]
+    });
+    if (!product) throw new NotFoundException(&#x27;Không tìm thấy sản phẩm&#x27;);
+
+    const imageUrls &#x3D; product.images.map(img &#x3D;&gt; img.image_url);
+    // Xóa trong DB
+    await this.productRepo.delete(id);
+
+    // 🌟 GỌI HÀM CLOUDINARY ĐỂ XÓA ẢNH
+    if (imageUrls.length &gt; 0) {
+      Promise.allSettled(
+        imageUrls.map(async (url) &#x3D;&gt; {
+          const publicId &#x3D; this.cloudinaryService.extractPublicId(url);
+          if (publicId) {
+            await this.cloudinaryService.deleteImage(publicId);
+          }
+        })
+      ).then(results &#x3D;&gt; {
+        const failed &#x3D; results.filter(r &#x3D;&gt; r.status &#x3D;&#x3D;&#x3D; &#x27;rejected&#x27;);
+        if (failed.length &gt; 0) {
+          console.error(&#x60;[CẢNH BÁO] Thất bại khi xóa ${failed.length} ảnh trên Cloudinary cho SP ID ${id}&#x60;);
+        }
+      });
+    }
+
+    return { message: &#x27;Đã xóa sản phẩm và dọn sạch hình ảnh trên Cloud&#x27; };
+  }
+
+  async releaseStock(
+    params: { productId?: number; variantId?: number; quantity: number },
+    queryRunner: QueryRunner,
+  ): Promise&lt;void&gt; {
+    const { productId, variantId, quantity } &#x3D; params;
+
+
+    if (productId) {
+      // 2. Hoàn kho cho Sản phẩm gốc
+      const product &#x3D; await queryRunner.manager.findOne(Product, {
+        where: { product_id: productId },
+      });
+
+      if (!product) throw new NotFoundException(&#x60;Không tìm thấy sản phẩm: ${productId}&#x60;);
+
+      if (product.stock_quantity !&#x3D;&#x3D; -1) {
+        product.stock_quantity +&#x3D; quantity;
+        await queryRunner.manager.save(Product, product);
+      }
+    }
+  }
+}</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'ProductsService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

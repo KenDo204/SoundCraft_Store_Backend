@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { RevenuesService } from './revenues.service';
-import { CreateRevenueDto } from './dto/create-revenue.dto';
-import { UpdateRevenueDto } from './dto/update-revenue.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { DashboardStatsResponseDto } from './dto/dashboard-stats-response.dto';
+import { MonthlyRevenueResponseDto } from './dto/monthly-revenue-response.dto';
 
+@ApiTags('Revenues')
 @Controller('revenues')
 export class RevenuesController {
   constructor(private readonly revenuesService: RevenuesService) {}
 
-  @Post()
-  create(@Body() createRevenueDto: CreateRevenueDto) {
-    return this.revenuesService.create(createRevenueDto);
+  @ApiOperation({ summary: 'Lấy các chỉ số thống kê cho Dashboard Admin' })
+  @ApiResponse({ status: 200, type: DashboardStatsResponseDto })
+  @Get('dashboard-stats')
+  async getStats(): Promise<DashboardStatsResponseDto> {
+    return await this.revenuesService.getDashboardStats();
+  }
+
+  @ApiOperation({ summary: 'Lấy doanh thu theo tháng' })
+  @ApiResponse({ status: 200, type: [MonthlyRevenueResponseDto] })
+  @Get('monthly-revenue/:year')
+  async getMonthlyRevenue(@Param('year') year: string): Promise<MonthlyRevenueResponseDto[]> {
+    return await this.revenuesService.getMonthlyRevenue(+year);
   }
 
   @Get()
@@ -20,15 +31,5 @@ export class RevenuesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.revenuesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRevenueDto: UpdateRevenueDto) {
-    return this.revenuesService.update(+id, updateRevenueDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.revenuesService.remove(+id);
   }
 }
