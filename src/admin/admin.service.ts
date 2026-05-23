@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity'; // Trỏ đúng đường dẫn tới User Entity
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
+import { UserRole } from '../users/enums/user-role.enum';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 
@@ -15,60 +16,67 @@ export class AdminService {
   ) {}
 
   // 1. Danh sách & Tìm kiếm người dùng
-  async getUsers(query: GetUsersQueryDto) {
-    const { page, limit, search, isActive, minSpending, maxSpending } = query;
-    
-    // Tạo QueryBuilder để join với bảng đơn hàng (giả sử tên table là 'orders')
-    const queryBuilder = this.userRepository.createQueryBuilder('user')
-      .leftJoin('orders', 'order', 'order.userId = user.userId AND order.status = :status', { status: 'COMPLETED' })
-      .select([
-        'user.userId', 'user.fullName', 'user.email', 'user.mobile', 
-        'user.isActive', 'user.role', 'user.createdAt'
-      ])
-      .addSelect('SUM(COALESCE(order.totalAmount, 0))', 'totalSpending') // Tính tổng chi tiêu
-      .groupBy('user.userId');
+  async getUsers(query: GetUsersQueryDto, creatorRole: UserRole) {
+    try {
+      const { page, limit, search, isActive, minSpending, maxSpending } = query;
+      
+      // Tạo QueryBuilder để join với bảng đơn hàng (giả sử tên table là 'orders')
+      const queryBuilder = this.userRepository.createQueryBuilder('user')
+        .select([
+          'user.user_id', 'user.full_name', 'user.email', 'user.mobile',
+          'user.is_active', 'user.role', 'user.created_at'
+        ]);
 
-    // 1. Tìm kiếm nhanh SĐT/Email/Tên
-    if (search) {
-      queryBuilder.andWhere(
-        '(user.email ILIKE :search OR user.mobile ILIKE :search OR user.fullName ILIKE :search)',
-        { search: `%${search}%` }
-      );
+      // Ràng buộc lọc danh sách hiển thị dựa vào role của người gọi
+      if (creatorRole === UserRole.MANAGER) {
+        queryBuilder.andWhere('user.role = :managerRoleFilter', { managerRoleFilter: UserRole.STAFF });
+      } else if (creatorRole === UserRole.ADMIN || creatorRole === UserRole.OWNER) {
+        queryBuilder.andWhere('user.role != :superAdminRoleFilter', { superAdminRoleFilter: UserRole.SUPER_ADMIN });
+      } else if (creatorRole !== UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Bạn không có quyền truy cập danh sách tài khoản!');
+      }
+
+      // 1. Tìm kiếm nhanh SĐT/Email/Tên
+      if (search) {
+        queryBuilder.andWhere(
+          '(user.email ILIKE :search OR user.mobile ILIKE :search OR user.full_name ILIKE :search)',
+          { search: `%${search}%` }
+        );
+      }
+
+      // 2. Lọc theo trạng thái Active/Banned
+      if (isActive !== undefined) {
+        queryBuilder.andWhere('user.is_active = :isActive', { isActive: isActive === 'true' });
+      }
+
+      // Removed spending filters due to missing Order entity integration
+      // if (minSpending !== undefined) { ... }
+      // if (maxSpending !== undefined) { ... }
+
+      queryBuilder.orderBy('user.created_at', 'DESC')
+        .offset((page - 1) * limit)
+        .limit(limit);
+
+      const users = await queryBuilder.getRawMany(); // Lấy dữ liệu dạng raw để có field totalSpending
+      const count = await queryBuilder.getCount();
+
+      return {
+        data: users,
+        meta: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      };
+    } catch (error) {
+      console.error('Error in getUsers:', error);
+      throw error;
     }
-
-    // 2. Lọc theo trạng thái Active/Banned
-    if (isActive !== undefined) {
-      queryBuilder.andWhere('user.isActive = :isActive', { isActive: isActive === 'true' });
-    }
-
-    // 3. Lọc theo tổng chi tiêu (Sử dụng HAVING vì đây là kết quả của hàm SUM)
-    if (minSpending !== undefined) {
-      queryBuilder.having('SUM(COALESCE(order.totalAmount, 0)) >= :minSpending', { minSpending });
-    }
-    if (maxSpending !== undefined) {
-      queryBuilder.having('SUM(COALESCE(order.totalAmount, 0)) <= :maxSpending', { maxSpending });
-    }
-
-    queryBuilder.orderBy('user.createdAt', 'DESC')
-      .offset((page - 1) * limit)
-      .limit(limit);
-
-    const users = await queryBuilder.getRawMany(); // Lấy dữ liệu dạng raw để có field totalSpending
-    const count = await queryBuilder.getCount();
-
-    return {
-      data: users,
-      meta: {
-        total: count,
-        page,
-        limit,
-        totalPages: Math.ceil(count / limit),
-      },
-    };
   }
 
   // 2. Xem chi tiết hồ sơ 360 độ
-  async getUserDetail(userId: number): Promise<User> {
+  async getUserDetail(userId: number, creatorRole: UserRole): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
       // relations: ['addresses', 'orders'], // Mở comment dòng này khi bạn nối bảng Address và Order
@@ -77,12 +85,26 @@ export class AdminService {
     if (!user) {
       throw new NotFoundException('Không tìm thấy thông tin khách hàng');
     }
+
+    // Kiểm tra quyền truy cập chi tiết tài khoản
+    if (creatorRole === UserRole.MANAGER) {
+      if (user.role !== UserRole.STAFF) {
+        throw new ForbiddenException('Quản lý chỉ có quyền xem chi tiết tài khoản Nhân viên (STAFF)');
+      }
+    } else if (creatorRole === UserRole.ADMIN || creatorRole === UserRole.OWNER) {
+      if (user.role === UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Không có quyền xem chi tiết tài khoản SUPER_ADMIN');
+      }
+    } else if (creatorRole !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện hành động này!');
+    }
+
     return user;
   }
 
   // 3. Khóa / Mở khóa tài khoản
-  async toggleUserStatus(userId: number, isActive: boolean): Promise<void> {
-    const user = await this.getUserDetail(userId);
+  async toggleUserStatus(userId: number, isActive: boolean, creatorRole: UserRole): Promise<void> {
+    const user = await this.getUserDetail(userId, creatorRole);
     user.is_active = isActive;
     await this.userRepository.save(user);
   }

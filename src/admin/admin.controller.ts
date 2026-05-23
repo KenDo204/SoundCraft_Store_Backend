@@ -6,27 +6,34 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator'; // File decorator của bạn
 import { UserRole } from '../users/enums/user-role.enum';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Admin - Users Management')
 @ApiBearerAuth()
 // Áp dụng Guard cho toàn bộ Controller
 @UseGuards(JwtAuthGuard, RolesGuard) 
 // Chỉ các Role này mới được phép gọi API trong Controller này
-@Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.SUPER_ADMIN) 
+@Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.MANAGER) 
 @Controller('admin/users')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách người dùng (có phân trang và tìm kiếm)' })
-  async getUsers(@Query() query: GetUsersQueryDto) {
-    return await this.adminService.getUsers(query);
+  async getUsers(
+    @Query() query: GetUsersQueryDto,
+    @CurrentUser() creator: any,
+  ) {
+    return await this.adminService.getUsers(query, creator.role);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Xem chi tiết hồ sơ một khách hàng' })
-  async getUserDetail(@Param('id', ParseIntPipe) id: number) {
-    const data = await this.adminService.getUserDetail(id);
+  async getUserDetail(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() creator: any,
+  ) {
+    const data = await this.adminService.getUserDetail(id, creator.role);
     return {
       status: HttpStatus.OK,
       data,
@@ -39,8 +46,9 @@ export class AdminController {
   async toggleUserStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body('isActive') isActive: boolean,
+    @CurrentUser() creator: any,
   ) {
-    await this.adminService.toggleUserStatus(id, isActive);
+    await this.adminService.toggleUserStatus(id, isActive, creator.role);
     return {
       status: HttpStatus.OK,
       message: isActive ? 'Đã mở khóa tài khoản thành công' : 'Đã khóa tài khoản thành công',

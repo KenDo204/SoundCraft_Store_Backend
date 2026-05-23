@@ -23,4 +23,7 @@ export class OrderItem {
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  @Column({ default: false })
+  is_reviewed: boolean;
 }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
@@ -75,9 +75,13 @@ export class Order {
   @Column({ length: 50, nullable: true })
   tracking_code: string;
 
-  @ApiProperty()
   @CreateDateColumn()
+  @ApiProperty()
   created_at: Date;
+
+  @UpdateDateColumn()
+  @ApiProperty()
+  updated_at: Date;
 
   @ManyToOne(() => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id' })

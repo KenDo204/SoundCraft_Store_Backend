@@ -123,4 +123,20 @@ export class OrdersController {
       data
     };
   }
+
+  @Post(':id/confirm-receipt')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Khách hàng xác nhận đã nhận được hàng' })
+  async confirmReceipt(
+    @CurrentUserId() userId: number,
+    @Param('id', ParseIntPipe) orderId: number,
+  ) {
+    const data = await this.ordersService.confirmReceipt(userId, orderId);
+    return {
+      status: 200,
+      message: 'Xác nhận nhận hàng thành công',
+      data
+    };
+  }
 }

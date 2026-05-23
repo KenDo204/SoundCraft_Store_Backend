@@ -56,8 +56,8 @@ import { VnpayModule } from './vnpay/vnpay.module';
         },
         autoLoadEntities: true,
         // Ở chế độ dev, synchronize=true giúp tự tạo bảng. Khi bảo vệ xong đem lên thật thì nên tắt.
-        // synchronize: true,
-        synchronize: false,
+        synchronize: true,
+        // synchronize: false,
 
         ssl: process.env.NODE_ENV === 'production'
           ? { rejectUnauthorized: false }

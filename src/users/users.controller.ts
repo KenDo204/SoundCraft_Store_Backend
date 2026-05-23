@@ -1,13 +1,18 @@
-import { Controller, Get, Put, Body, UseGuards, HttpCode, 
-  HttpStatus, UseInterceptors, UploadedFile, Post } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Body, UseGuards, HttpCode, 
+  HttpStatus, UseInterceptors, UploadedFile, Post, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { CurrentUserId } from '../auth/decorators/current-user.decorator'; 
+import { CurrentUserId, CurrentUser } from '../auth/decorators/current-user.decorator'; 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; 
 import { ForgotPasswordDto, ResetPasswordDto } from '@/auth/dto/forgot-password.dto';
+import { RolesGuard } from '@/auth/guards/roles.guard';
+import { Roles } from '@/auth/decorators/roles.decorator';
+import { UserRole } from '@/users/enums/user-role.enum';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserByAdminDto } from './dto/update-user-by-admin.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -82,4 +87,55 @@ export class UsersController {
   //     message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.',
   //   };
   // }
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Tạo tài khoản mới' })
+  async createAccount(
+    @Body() dto: CreateUserDto,
+    @CurrentUser() creator: any,
+  ) {
+    const data = await this.usersService.createAccountByAdmin(dto, creator.role);
+    return {
+      status: HttpStatus.CREATED,
+      message: 'Tạo tài khoản thành công',
+      data,
+    };
+  }
+
+  @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Cập nhật tài khoản' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async updateAccount(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() dto: UpdateUserByAdminDto,
+    @CurrentUser() creator: any,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const data = await this.usersService.updateUserByAdmin(userId, dto, creator.role, file);
+    return {
+      status: HttpStatus.OK,
+      message: 'Cập nhật tài khoản thành công',
+      data,
+    };
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Xóa tài khoản' })
+  async deleteAccount(
+    @Param('id', ParseIntPipe) userId: number,
+    @CurrentUser() creator: any,
+  ) {
+    await this.usersService.deleteUser(userId, creator.role);
+    return {
+      status: HttpStatus.OK,
+      message: 'Xóa tài khoản thành công',
+    };
+  }
 }

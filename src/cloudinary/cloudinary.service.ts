@@ -94,8 +94,6 @@ export class CloudinaryService {
     });
   }
 
-
-
   async uploadImageUsers(file: Express.Multer.File): Promise<any> {
     return new Promise((resolve, reject) => {
       const upload = cloudinary.uploader.upload_stream(
@@ -123,4 +121,19 @@ export class CloudinaryService {
       toStream(file.buffer).pipe(upload);
     });
   }
+
+  async uploadImageReviews(file: Express.Multer.File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        { folder: 'soundcraft/reviews' }, // Tên folder bạn muốn lưu trên Cloudinary
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+      
+      toStream(file.buffer).pipe(upload);
+    });
+  }
+
 }

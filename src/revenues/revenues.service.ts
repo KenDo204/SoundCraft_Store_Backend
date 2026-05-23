@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Revenue } from './entities/revenue.entity';
@@ -20,7 +20,13 @@ export class RevenuesService {
     @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
-  async getDashboardStats(): Promise<DashboardStatsResponseDto> {
+  async getDashboardStats(userId: number): Promise<DashboardStatsResponseDto> {
+    // Kiểm tra user có phải ADMIN không
+    // const user = await this.userRepo.findOne({ where: { user_id: userId } });
+    // if (!user || user.role !== UserRole.ADMIN) {
+    //   throw new UnauthorizedException('Bạn không có quyền truy cập vào thống kê Admin');
+    // }
+    
     const [
       totalProducts,
       totalCategories,

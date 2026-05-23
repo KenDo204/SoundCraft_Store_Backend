@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -7,6 +7,8 @@ import { CartService } from '@/carts/carts.service';
 import { RevenuesService } from '@/revenues/revenues.service'; 
 import { UserRole } from '@/users/enums/user-role.enum';
 import { ChangePasswordDto } from '@/users/dto/change-password.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserByAdminDto } from './dto/update-user-by-admin.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDto } from '@/auth/dto/forgot-password.dto';
@@ -225,5 +227,168 @@ export class UsersService {
     user.resetPasswordExpires = null;
     
     await this.userRepository.save(user);
+  }
+
+  // --- ADMIN: CREATE ACCOUNT ---
+  async createAccountByAdmin(dto: CreateUserDto, creatorRole: UserRole): Promise<User> {
+    // Ràng buộc phân quyền
+    if (creatorRole === UserRole.MANAGER) {
+      if (dto.role !== UserRole.STAFF) {
+        throw new ForbiddenException('Quản lý chỉ được tạo tài khoản cho Nhân viên (STAFF)');
+      }
+    } else if (creatorRole === UserRole.ADMIN || creatorRole === UserRole.OWNER) {
+      if (dto.role === UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Không có quyền tạo tài khoản SUPER_ADMIN');
+      }
+    } else if (creatorRole !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện hành động này!');
+    }
+    // 1. Kiểm tra Email tồn tại
+    const isEmailTaken = await this.userRepository.findOne({ where: { email: dto.email } });
+    if (isEmailTaken) {
+      throw new BadRequestException('Email đã tồn tại trong hệ thống');
+    }
+
+    // 2. Kiểm tra Số điện thoại tồn tại (nếu có)
+    if (dto.mobile) {
+      const isMobileTaken = await this.userRepository.findOne({ where: { mobile: dto.mobile } });
+      if (isMobileTaken) {
+        throw new BadRequestException('Số điện thoại đã tồn tại trong hệ thống');
+      }
+    }
+
+    // 3. Nghiệp vụ tính tuổi
+    let dobDate: Date | undefined = undefined;
+    if (dto.dob) {
+      dobDate = new Date(dto.dob);
+      const age = new Date().getFullYear() - dobDate.getFullYear();
+      if (age < 18) {
+        throw new BadRequestException('Người dùng phải từ 18 tuổi trở lên');
+      }
+    }
+
+    // 4. Hash mật khẩu (BCrypt)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(dto.password, salt);
+
+    // 5. Lưu User
+    const newUser = this.userRepository.create({
+      full_name: dto.full_name,
+      email: dto.email,
+      password: hashedPassword,
+      mobile: dto.mobile,
+      role: dto.role || UserRole.CUSTOMER,
+      dob: dobDate,
+      gender: dto.gender,
+      is_active: true,
+    });
+    const savedUser = await this.userRepository.save(newUser);
+
+    return savedUser;
+  }
+
+  async updateUserByAdmin(
+    userId: number,
+    dto: UpdateUserByAdminDto,
+    creatorRole: UserRole,
+    avatarFile?: Express.Multer.File,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+
+    // Ràng buộc phân quyền
+    if (creatorRole === UserRole.MANAGER) {
+      if (user.role !== UserRole.STAFF) {
+        throw new ForbiddenException('Quản lý chỉ có quyền cập nhật tài khoản của Nhân viên (STAFF)');
+      }
+      if (dto.role && dto.role !== UserRole.STAFF) {
+        throw new ForbiddenException('Quản lý chỉ có quyền gán vai trò Nhân viên (STAFF)');
+      }
+    } else if (creatorRole === UserRole.ADMIN || creatorRole === UserRole.OWNER) {
+      if (user.role === UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Không có quyền cập nhật tài khoản SUPER_ADMIN');
+      }
+      if (dto.role === UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Không có quyền gán vai trò SUPER_ADMIN');
+      }
+    } else if (creatorRole !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện hành động này!');
+    }
+
+    // 1. Kiểm tra email trùng
+    if (dto.email && dto.email !== user.email) {
+      const isEmailTaken = await this.userRepository.findOne({ where: { email: dto.email } });
+      if (isEmailTaken) throw new BadRequestException('Email đã tồn tại');
+      user.email = dto.email;
+    }
+
+    // 2. Kiểm tra số điện thoại trùng
+    if (dto.mobile && dto.mobile !== user.mobile) {
+      const isMobileTaken = await this.userRepository.findOne({ where: { mobile: dto.mobile } });
+      if (isMobileTaken) throw new BadRequestException('Số điện thoại đã tồn tại');
+      user.mobile = dto.mobile;
+    }
+
+    if (dto.full_name) user.full_name = dto.full_name;
+    if (dto.gender) user.gender = dto.gender;
+
+    // 3. Đổi mật khẩu (nếu có truyền)
+    if (dto.password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(dto.password, salt);
+    }
+
+    // 4. Nghiệp vụ tính tuổi
+    if (dto.dob) {
+      const dobDate = new Date(dto.dob);
+      const age = new Date().getFullYear() - dobDate.getFullYear();
+      if (age < 18) {
+        throw new BadRequestException('Người dùng phải từ 18 tuổi trở lên');
+      }
+      user.dob = dobDate;
+    }
+
+    // 5. Cập nhật các quyền Admin
+    if (dto.role) user.role = dto.role;
+    if (dto.is_active !== undefined) user.is_active = dto.is_active;
+
+    // 6. Xử lý Avatar qua Cloudinary
+    if (avatarFile) {
+      const oldAvatarUrl = user.avatar;
+      const uploadResult = await this.cloudinaryService.uploadImageUsers(avatarFile);
+      user.avatar = uploadResult.secure_url;
+
+      if (oldAvatarUrl) {
+        const publicId = this.cloudinaryService.extractPublicId(oldAvatarUrl);
+        if (publicId) {
+          this.cloudinaryService.deleteImage(publicId).catch((err) => {
+            console.error(`[CẢNH BÁO] Không thể xóa avatar cũ: ${publicId}`, err);
+          });
+        }
+      }
+    }
+
+    return this.userRepository.save(user);
+  }
+
+  // --- ADMIN: DELETE ACCOUNT ---
+  async deleteUser(userId: number, creatorRole: UserRole): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    
+    // Ràng buộc phân quyền
+    if (creatorRole === UserRole.MANAGER) {
+      if (user.role !== UserRole.STAFF) {
+        throw new ForbiddenException('Quản lý chỉ có quyền xóa tài khoản của Nhân viên (STAFF)');
+      }
+    } else if (creatorRole === UserRole.ADMIN || creatorRole === UserRole.OWNER) {
+      if (user.role === UserRole.SUPER_ADMIN) {
+        throw new ForbiddenException('Không có quyền xóa tài khoản SUPER_ADMIN');
+      }
+    } else if (creatorRole !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện hành động này!');
+    }
+
+    await this.userRepository.remove(user);
   }
 }

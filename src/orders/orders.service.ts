@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, QueryRunner, In } from 'typeorm';
+import { Repository, DataSource, QueryRunner, In, LessThanOrEqual } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CheckoutRequestDto } from './dto/checkout-request.dto';
@@ -11,6 +11,8 @@ import { GhnService } from '../ghn/ghn.service';
 import { Product } from '../products/entities/product.entity';
 import { VnpayService } from '../vnpay/vnpay.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { OrderStatus } from './enums/order-status.enum';
 
 @Injectable()
 export class OrdersService {
@@ -234,32 +236,77 @@ export class OrdersService {
 
   // 3. NGHIỆP VỤ XỬ LÝ VNPAY CALLBACK
   async handleVnpayCallback(query: any) {
-     // Validate VNPAY Checksum Signature (Đọc code VNPAY trong services VNPay của bạn)
-     const isValid = this.vnpayService.validateSignature(query);
-     if (!isValid) return { RspCode: '97', Message: 'Invalid signature' };
+      console.log('[VNPAY Callback] Received data:', query);
+      // Validate VNPAY Checksum Signature (Đọc code VNPAY trong services VNPay của bạn)
+      const isValid = this.vnpayService.validateSignature(query);
+      if (!isValid) {
+        console.error('[VNPAY Callback] Invalid signature');
+        return { RspCode: '97', Message: 'Invalid signature' };
+      }
 
-     const orderCode = query.vnp_TxnRef;
-     const paymentStatus = query.vnp_ResponseCode === '00' && query.vnp_TransactionStatus === '00';
+      const orderCode = query.vnp_TxnRef;
+      const paymentStatus = query.vnp_ResponseCode === '00' && query.vnp_TransactionStatus === '00';
 
-     const order = await this.orderRepo.findOne({ where: { order_code: orderCode } });
+      const order = await this.orderRepo.findOne({ where: { order_code: orderCode } });
 
-     if (!order) return { RspCode: '01', Message: 'Order not found' };
+      if (!order) {
+        console.error(`[VNPAY Callback] Order not found: ${orderCode}`);
+        return { RspCode: '01', Message: 'Order not found' };
+      }
 
-     // Fix lặp lại - Idempotency
-     if (order.payment_status === 'PAID') return { RspCode: '02', Message: 'Order already confirmed' };
+      // Fix lặp lại - Idempotency
+      if (order.payment_status === 'PAID') {
+        return { RspCode: '00', Message: 'Order already confirmed' }; // Trả về 00 để VNPAY ko gọi lại nữa
+      }
 
-     // Check matching amount (VD: 1000000 -> 100000000 VNĐ *100 bên VNPay)
-     if (Number(order.total_amount) * 100 !== Number(query.vnp_Amount)) {
-       return { RspCode: '04', Message: 'Invalid amount' };
-     }
+      // Check matching amount (VD: 1000000 -> 100000000 VNĐ *100 bên VNPay)
+      const vnpAmount = Number(query.vnp_Amount);
+      const orderAmount = Number(order.total_amount) * 100;
+      if (orderAmount !== vnpAmount) {
+        console.error(`[VNPAY Callback] Amount mismatch. Expected: ${orderAmount}, Received: ${vnpAmount}`);
+        return { RspCode: '04', Message: 'Invalid amount' };
+      }
 
-     if (paymentStatus) {
-        order.payment_status = 'PAID';
-        await this.orderRepo.save(order);
-        return { RspCode: '00', Message: 'Confirm Success' };
-     }
+      if (paymentStatus) {
+         console.log(`[VNPAY Callback] Payment success for order: ${orderCode}`);
+         order.payment_status = 'PAID';
+         await this.orderRepo.save(order);
+         return { RspCode: '00', Message: 'Confirm Success' };
+      }
 
-     return { RspCode: '00', Message: 'Payment not successful' };
+      console.warn(`[VNPAY Callback] Payment failed or cancelled for order: ${orderCode}. ResponseCode: ${query.vnp_ResponseCode}`);
+      return { RspCode: '00', Message: 'Payment not successful' };
+  }
+
+  // 3.5. TỰ ĐỘNG HOÀN THÀNH ĐƠN HÀNG SAU 3 NGÀY DELIVERED
+  @Cron(CronExpression.EVERY_HOUR)
+  async handleAutoCompletedOrders() {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    const ordersToComplete = await this.orderRepo.find({
+      where: {
+        status: OrderStatus.DELIVERED,
+        updated_at: LessThanOrEqual(threeDaysAgo),
+      },
+      relations: ['user'],
+    });
+
+    for (const order of ordersToComplete) {
+      order.status = OrderStatus.COMPLETED;
+      order.payment_status = 'PAID'; // Đã hoàn thành thì coi như đã trả tiền (đặc biệt là COD)
+      order.note = (order.note || '') + ' [Tự động hoàn thành sau 3 ngày]';
+      await this.orderRepo.save(order);
+      
+      // Gửi thông báo cập nhật trạng thái đơn hàng cho người dùng
+      if (order.user) {
+        await this.notificationsService.sendOrderNotification(order.user.user_id, order.order_code, OrderStatus.COMPLETED);
+      }
+    }
+    
+    if (ordersToComplete.length > 0) {
+      console.log(`[Cron Job] Đã tự động hoàn thành ${ordersToComplete.length} đơn hàng.`);
+    }
   }
 
   // 4. LẤY DANH SÁCH ORDER CHO ADMIN
@@ -275,7 +322,14 @@ export class OrdersService {
   async updateOrderStatus(orderId: number, status: string) {
     const order = await this.orderRepo.findOne({ where: { order_id: orderId }, relations: ['user'] });
     if (!order) throw new NotFoundException('Không tìm thấy đơn hàng');
+    
     order.status = status;
+    
+    // Nếu Admin chuyển trạng thái thành COMPLETED, tự động set payment_status thành PAID
+    if (status === OrderStatus.COMPLETED) {
+      order.payment_status = 'PAID';
+    }
+
     const updatedOrder = await this.orderRepo.save(order);
 
     // Gửi thông báo cập nhật trạng thái đơn hàng cho người dùng
@@ -337,6 +391,36 @@ export class OrdersService {
     return orders.map(order => this.mapToOrderResponse(order));
   }
 
+  // 8. NGƯỜI DÙNG XÁC NHẬN ĐÃ NHẬN HÀNG
+  async confirmReceipt(userId: number, orderId: number) {
+    const order = await this.orderRepo.findOne({ 
+      where: { order_id: orderId, user: { user_id: userId } } 
+    });
+
+    if (!order) {
+      throw new NotFoundException('Không tìm thấy đơn hàng');
+    }
+
+    if (order.status !== OrderStatus.DELIVERED) {
+      throw new BadRequestException('Chỉ có thể xác nhận khi đơn hàng đang ở trạng thái đã giao (DELIVERED)');
+    }
+
+    order.status = OrderStatus.COMPLETED;
+    order.note = (order.note || '') + ' [Người dùng xác nhận đã nhận hàng]';
+    
+    // Nếu là đơn COD, khi xác nhận nhận hàng cũng coi như đã thanh toán
+    if (order.payment_method === 'COD') {
+      order.payment_status = 'PAID';
+    }
+
+    const updatedOrder = await this.orderRepo.save(order);
+
+    // Thông báo cho hệ thống hoặc người dùng nếu cần
+    await this.notificationsService.sendOrderNotification(userId, order.order_code, OrderStatus.COMPLETED);
+
+    return updatedOrder;
+  }
+
   // HELPER MAPPING
   private mapToOrderResponse(order: Order) {
     if(!order) return null;
@@ -361,7 +445,8 @@ export class OrdersService {
           productName: item.product?.product_name,
           quantity: item.quantity,
           price: Number(item.price_at_purchase),
-          imageUrl: thumbnailImg ? thumbnailImg.image_url : (item.product?.images?.[0]?.image_url || null)
+          imageUrl: thumbnailImg ? thumbnailImg.image_url : (item.product?.images?.[0]?.image_url || null),
+          isReviewed: item.is_reviewed
         };
       }) || []
     };
