@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsOptional, IsBoolean, MaxLength, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 
 export class CreateCategoryDto {
@@ -30,4 +30,9 @@ export class CreateCategoryDto {
   @Transform(({ value }) => value === 'true' || value === true || value === 1 || value === '1')
   @IsBoolean()
   is_active?: boolean;
+
+  @ApiPropertyOptional({ description: 'Chuỗi JSON chứa mảng URL ảnh muốn giữ lại' })
+  @IsString()
+  @IsOptional()
+  image_url?: string;
 }

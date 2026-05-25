@@ -98,6 +98,96 @@ export class ProductsController {
   }
 
   // =====================================
+  // 3.1. LẤY DANH SÁCH SẢN PHẨM HOẠT ĐỘNG (DÀNH CHO NGƯỜI DÙNG)
+  // =====================================
+  @Get('active')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lấy danh sách tất cả sản phẩm đang hoạt động' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'keyword', required: false, type: String })
+  @ApiQuery({ name: 'brandId', required: false, type: Number })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
+  @ApiQuery({ name: 'priceMin', required: false, type: Number })
+  @ApiQuery({ name: 'priceMax', required: false, type: Number })
+  @ApiQuery({ name: 'inStock', required: false, type: Boolean })
+  async getActiveList(@Query() query: any) {
+    const data = await this.productsService.getActiveProducts(query);
+    return {
+      status: 200,
+      message: 'Lấy danh sách sản phẩm hoạt động thành công',
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
+    };
+  }
+
+  // =====================================
+  // 3.2. LẤY DANH SÁCH SẢN PHẨM BÁN CHẠY (BÁN ĐƯỢC >= 2)
+  // =====================================
+  @Get('best-sellers')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm bán chạy (số lượng bán >= 2)' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getBestSellersList(@Query() query: any) {
+    const data = await this.productsService.getBestSellers(query);
+    return {
+      status: 200,
+      message: 'Lấy danh sách sản phẩm bán chạy thành công',
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
+    };
+  }
+
+  // =====================================
+  // 3.3. LẤY DANH SÁCH SẢN PHẨM THEO DANH MỤC CHA (LEVEL = 0/1)
+  // =====================================
+  @Get('category/parent/:parentId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm theo danh mục cha và các danh mục con trực thuộc' })
+  @ApiParam({ name: 'parentId', type: Number, description: 'ID của danh mục cha' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getByParentCategory(
+    @Param('parentId', ParseIntPipe) parentId: number,
+    @Query() query: any,
+  ) {
+    const data = await this.productsService.getProductsByParentCategory(parentId, query);
+    return {
+      status: 200,
+      message: 'Lấy danh sách sản phẩm theo danh mục cha thành công',
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
+    };
+  }
+
+  // =====================================
+  // 3.4. LẤY DANH SÁCH SẢN PHẨM ĐANG GIẢM GIÁ (PRICE < ORIGINAL_PRICE)
+  // =====================================
+  @Get('discounted')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm đang giảm giá (Giá bán < Giá gốc)' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getDiscountedList(@Query() query: any) {
+    const data = await this.productsService.getDiscountedProducts(query);
+    return {
+      status: 200,
+      message: 'Lấy danh sách sản phẩm giảm giá thành công',
+      data: {
+        ...data,
+        items: ProductResponseDto.fromEntities(data.items),
+      },
+    };
+  }
+
+  // =====================================
   // 4. LẤY CHI TIẾT 1 SẢN PHẨM
   // =====================================
   @Get(':id')

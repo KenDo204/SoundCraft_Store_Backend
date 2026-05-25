@@ -137,19 +137,29 @@ export class CategoriesService {
       category.slug = this.generateSlug(updateDto.name); // Đổi tên thì đổi luôn slug
     }
 
-    // Xử lý ảnh
+    // Xử lý ảnh: ưu tiên file mới upload, nếu không có thì giữ URL cũ
     if (file) {
+      // Upload ảnh mới lên Cloudinary
       const uploadResult = await this.cloudinaryService.uploadImageCategories(file);
-      imageUrl = uploadResult.secure_url;
+      const newImageUrl = uploadResult.secure_url;
 
+      // Xóa ảnh cũ trên Cloudinary (nếu có)
       if (category.image_url) {
         const oldPublicId = this.cloudinaryService.extractPublicId(category.image_url);
-        if (oldPublicId) this.cloudinaryService.deleteImage(oldPublicId).catch(() => {});
+        if (oldPublicId) this.cloudinaryService.deleteImage(oldPublicId).catch((err) => {
+          console.error('[CẢNH BÁO] Lỗi xóa ảnh cũ Cloudinary:', oldPublicId, err);
+        });
       }
+
+      imageUrl = newImageUrl;
     }
+    // Nếu không có file mới → giữ nguyên imageUrl = category.image_url (đã gán ở trên)
+
+    // Tách image_url ra khỏi updateDto để tránh bị overwrite bởi spread
+    const { image_url: _ignored, file: _file, ...restDto } = updateDto as any;
 
     const updatedCategory = this.categoryRepository.merge(category, {
-      ...updateDto,
+      ...restDto,
       image_url: imageUrl,
     });
 

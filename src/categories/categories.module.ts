@@ -15,5 +15,6 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module'; // Đường
   ],
   controllers: [CategoriesController],
   providers: [CategoriesService],
+  exports: [CategoriesService],
 })
 export class CategoriesModule {}

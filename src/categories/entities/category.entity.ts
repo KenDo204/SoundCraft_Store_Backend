@@ -29,7 +29,12 @@ export class Category {
     nullable: true,
     description: 'Ảnh nền Banner khi bấm vào danh mục'
   })
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @ApiProperty({
+    example: null,
+    nullable: true,
+    description: 'JSON string of retained image URLs'
+  })
+  @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
   image_url: string | null;
 
   @ApiProperty({ example: 1, description: 'Cấp độ danh mục (1: Gốc, 2: Con, 3: Cháu)' })

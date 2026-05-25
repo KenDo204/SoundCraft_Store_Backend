@@ -5,6 +5,8 @@ import { Product } from './entities/product.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { OrdersService } from '@/orders/orders.service';
+import { CategoriesService } from '@/categories/categories.service';
 
 @Injectable()
 export class ProductsService {
@@ -13,11 +15,44 @@ export class ProductsService {
     @InjectRepository(ProductImage) private imageRepo: Repository<ProductImage>,
     private dataSource: DataSource,
     private cloudinaryService: CloudinaryService,
+    private ordersService: OrdersService,
+    private categoriesService: CategoriesService,
   ) { }
 
   // =====================================
   // HELPERS
   // =====================================
+  private generateSlug(text: string): string {
+    return text.toString().toLowerCase()
+      .normalize('NFD') // Tách dấu ra khỏi chữ
+      .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D') // Chữ Đ
+      .replace(/\s+/g, '-') // Đổi khoảng trắng thành gạch ngang
+      .replace(/[^\w\-]+/g, '') // Xóa các ký tự đặc biệt
+      .replace(/\-\-+/g, '-') // Xóa gạch ngang thừa
+      .replace(/^-+/, '') // Xóa gạch ở đầu
+      .replace(/-+$/, ''); // Xóa gạch ở cuối
+  }
+
+  private async getUniqueSlug(name: string, excludeId?: number): Promise<string> {
+    const baseSlug = this.generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+    while (true) {
+      const query = this.productRepo.createQueryBuilder('product')
+        .where('product.slug = :slug', { slug });
+      if (excludeId) {
+        query.andWhere('product.product_id != :excludeId', { excludeId });
+      }
+      const exists = await query.getOne();
+      if (!exists) {
+        break;
+      }
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    return slug;
+  }
 
 
 
@@ -51,11 +86,13 @@ export class ProductsService {
 
 
 
+    const productSlug = await this.getUniqueSlug(dto.slug || dto.productName);
+
     return this.dataSource.transaction(async (manager) => {
       // 2. Tạo Product
       const product = manager.create(Product, {
         product_name: dto.productName,
-        slug: dto.slug,
+        slug: productSlug,
         product_description: dto.productDescription,
         status: dto.status || 'ACTIVE',
         price: basePrice,
@@ -144,11 +181,18 @@ export class ProductsService {
       newGalleryUrls.push(...results.map(r => r.secure_url));
     }
 
+    let finalSlug = existingProduct.slug;
+    if (dto.slug) {
+      finalSlug = await this.getUniqueSlug(dto.slug, id);
+    } else if (dto.productName && dto.productName !== existingProduct.product_name) {
+      finalSlug = await this.getUniqueSlug(dto.productName, id);
+    }
+
     return this.dataSource.transaction(async (manager) => {
       // 1. Cập nhật thông tin gốc
       Object.assign(existingProduct, {
         product_name: dto.productName,
-        slug: dto.slug,
+        slug: finalSlug,
         product_description: dto.productDescription,
         status: dto.status,
         in_popular: dto.inPopular,
@@ -417,5 +461,193 @@ export class ProductsService {
         await queryRunner.manager.save(Product, product);
       }
     }
+  }
+
+  // 1. HIỂN THỊ DANH SÁCH SẢN PHẨM HOẠT ĐỘNG CHO NGƯỜI DÙNG
+  async getActiveProducts(query: any): Promise<{ items: Product[]; meta: any }> {
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 12;
+    const skip = (page - 1) * limit;
+
+    const { keyword, brandId, categoryId, priceMin, priceMax, inStock } = query;
+
+    const qb = this.productRepo.createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.images', 'images')
+      .where('product.status = :status', { status: 'ACTIVE' });
+
+    if (keyword) {
+      qb.andWhere('product.product_name LIKE :keyword', { keyword: `%${keyword}%` });
+    }
+
+    if (brandId) {
+      qb.andWhere('product.brand_id = :brandId', { brandId: Number(brandId) });
+    }
+
+    if (categoryId) {
+      qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+    }
+
+    if (priceMin) {
+      qb.andWhere('product.price >= :priceMin', { priceMin: Number(priceMin) });
+    }
+
+    if (priceMax) {
+      qb.andWhere('product.price <= :priceMax', { priceMax: Number(priceMax) });
+    }
+
+    if (inStock !== undefined && inStock !== null) {
+      const isStockBool = inStock === 'true' || inStock === true;
+      qb.andWhere('product.is_stock = :inStock', { inStock: isStockBool });
+    }
+
+    qb.orderBy('product.created_at', 'DESC');
+    qb.skip(skip).take(limit);
+
+    const [items, totalElements] = await qb.getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
+  }
+
+  // 2. HIỂN THỊ CÁC SẢN PHẨM BÁN CHẠY (SỐ LƯỢNG BÁN >= 2)
+  async getBestSellers(query: any): Promise<{ items: Product[]; meta: any }> {
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 12;
+    const skip = (page - 1) * limit;
+
+    // Lấy thống kê số lượng bán từ OrdersService
+    const soldStats = await this.ordersService.countSoldProducts();
+
+    // Lọc các sản phẩm có số lượng bán >= 2 và sắp xếp giảm dần theo số lượng bán
+    const sortedStats = soldStats
+      .filter(stat => stat.soldCount >= 2)
+      .sort((a, b) => b.soldCount - a.soldCount);
+
+    const totalElements = sortedStats.length;
+    const pagedStats = sortedStats.slice(skip, skip + limit);
+    const pagedIds = pagedStats.map(stat => stat.productId);
+
+    if (pagedIds.length === 0) {
+      return {
+        items: [],
+        meta: {
+          totalElements,
+          totalPages: Math.ceil(totalElements / limit),
+          currentPage: page,
+          limit,
+        }
+      };
+    }
+
+    // Query thông tin sản phẩm
+    const items = await this.productRepo.createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.images', 'images')
+      .where('product.product_id IN (:...pagedIds)', { pagedIds })
+      .andWhere('product.status = :status', { status: 'ACTIVE' })
+      .getMany();
+
+    // Sắp xếp lại danh sách sản phẩm theo đúng thứ tự pagedIds để đảm bảo bán chạy nhiều nhất xếp trước
+    const itemMap = new Map<number, Product>();
+    items.forEach(item => itemMap.set(Number(item.product_id), item));
+    
+    const sortedItems = pagedIds
+      .map(id => itemMap.get(id))
+      .filter((item): item is Product => !!item);
+
+    return {
+      items: sortedItems,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
+  }
+
+  // 3. LẤY DANH SÁCH SẢN PHẨM THEO DANH MỤC CHA (lấy tất cả danh mục level 3 thuộc danh mục đó)
+  async getProductsByParentCategory(parentCategoryId: number, query: any): Promise<{ items: Product[]; meta: any }> {
+    // Kiểm tra danh mục có tồn tại không
+    const parentCategory = await this.categoriesService.getCategoryById(parentCategoryId);
+    if (!parentCategory) {
+      throw new NotFoundException('Không tìm thấy danh mục');
+    }
+
+    // Lấy tất cả danh mục con trực tiếp (1 query) rồi filter level = 3
+    const children = await this.categoriesService.getAllForAdmin(undefined, parentCategoryId);
+    const leafIds = children
+      .filter((c) => c.level === 3)
+      .map((c) => Number(c.category_id));
+
+    // Nếu không có con level 3 (ví dụ parentCategory tự nó là leaf), dùng chính nó
+    const categoryIds = leafIds.length > 0 ? leafIds : [parentCategoryId];
+
+    // Query sản phẩm thuộc các category cuối cùng
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 12;
+    const skip = (page - 1) * limit;
+
+    const qb = this.productRepo.createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.images', 'images')
+      .where('product.category_id IN (:...categoryIds)', { categoryIds })
+      .andWhere('product.status = :status', { status: 'ACTIVE' });
+
+    qb.orderBy('product.created_at', 'DESC');
+    qb.skip(skip).take(limit);
+
+    const [items, totalElements] = await qb.getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
+  }
+
+
+  // 4. HIỂN THỊ DANH SÁCH SẢN PHẨM ĐANG GIẢM GIÁ (PRICE < ORIGINAL_PRICE)
+  async getDiscountedProducts(query: any): Promise<{ items: Product[]; meta: any }> {
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 12;
+    const skip = (page - 1) * limit;
+
+    const qb = this.productRepo.createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.images', 'images')
+      .where('product.price < product.original_price')
+      .andWhere('product.status = :status', { status: 'ACTIVE' });
+
+    qb.orderBy('product.created_at', 'DESC');
+    qb.skip(skip).take(limit);
+
+    const [items, totalElements] = await qb.getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        totalElements,
+        totalPages: Math.ceil(totalElements / limit),
+        currentPage: page,
+        limit,
+      }
+    };
   }
 }

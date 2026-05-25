@@ -451,4 +451,20 @@ export class OrdersService {
       }) || []
     };
   }
+
+  async countSoldProducts(): Promise<{ productId: number; soldCount: number }[]> {
+    const results = await this.orderItemRepo
+      .createQueryBuilder('item')
+      .leftJoin('item.order', 'order')
+      .select('item.product_id', 'productId')
+      .addSelect('SUM(item.quantity)', 'soldCount')
+      .where('order.status != :cancelledStatus', { cancelledStatus: OrderStatus.CANCELLED })
+      .groupBy('item.product_id')
+      .getRawMany();
+
+    return results.map(r => ({
+      productId: Number(r.productId),
+      soldCount: Number(r.soldCount)
+    }));
+  }
 }
