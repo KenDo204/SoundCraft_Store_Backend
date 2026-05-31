@@ -9,7 +9,8 @@ import {
   UseGuards, 
   Query, 
   UseInterceptors, 
-  UploadedFiles 
+  UploadedFiles,
+  ParseIntPipe
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -52,19 +53,19 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Người dùng chỉnh sửa đánh giá (bao gồm upload ảnh mới)' })
   async update(
     @CurrentUserId() userId: number,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateReviewDto: UpdateReviewDto,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    return this.reviewsService.update(userId, +id, updateReviewDto, files);
+    return this.reviewsService.update(userId, id, updateReviewDto, files);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Người dùng xóa đánh giá' })
-  async remove(@CurrentUserId() userId: number, @Param('id') id: string) {
-    return this.reviewsService.removeByUser(userId, +id);
+  async remove(@CurrentUserId() userId: number, @Param('id', ParseIntPipe) id: number) {
+    return this.reviewsService.removeByUser(userId, id);
   }
 
   // --- Endpoints cho Quản trị viên ---
@@ -74,8 +75,8 @@ export class ReviewsController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Admin duyệt đánh giá (Chờ duyệt -> Đã duyệt)' })
-  async approve(@Param('id') id: string) {
-    return this.reviewsService.approve(+id);
+  async approve(@Param('id', ParseIntPipe) id: number) {
+    return this.reviewsService.approve(id);
   }
 
   @Patch(':id/hide')
@@ -83,8 +84,8 @@ export class ReviewsController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Admin ẩn đánh giá' })
-  async hide(@Param('id') id: string) {
-    return this.reviewsService.hide(+id);
+  async hide(@Param('id', ParseIntPipe) id: number) {
+    return this.reviewsService.hide(id);
   }
 
   @Delete(':id/admin')
@@ -92,8 +93,8 @@ export class ReviewsController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Admin xóa vĩnh viễn đánh giá' })
-  async removeByAdmin(@Param('id') id: string) {
-    return this.reviewsService.removeByAdmin(+id);
+  async removeByAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.reviewsService.removeByAdmin(id);
   }
 
   @Get('admin/list')
@@ -107,8 +108,8 @@ export class ReviewsController {
 
   @Get('statistics/:productId')
   @ApiOperation({ summary: 'Lấy thống kê đánh giá theo sản phẩm' })
-  async getStatistics(@Param('productId') productId: string) {
-    return this.reviewsService.getStatisticsByProduct(+productId);
+  async getStatistics(@Param('productId', ParseIntPipe) productId: number) {
+    return this.reviewsService.getStatisticsByProduct(productId);
   }
 
   // --- Public Endpoints ---

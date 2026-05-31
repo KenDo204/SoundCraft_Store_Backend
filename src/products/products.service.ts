@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, QueryRunner } from 'typeorm';
+import { Repository, DataSource, QueryRunner, In } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { OrdersService } from '@/orders/orders.service';
 import { CategoriesService } from '@/categories/categories.service';
+import { Category } from '@/categories/entities/category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -52,6 +53,62 @@ export class ProductsService {
       counter++;
     }
     return slug;
+  }
+
+  private async getCategoryIdsWithDescendants(categorySlug: string): Promise<number[]> {
+    const categoryRepo = this.dataSource.getRepository(Category);
+    const category = await categoryRepo.findOne({ where: { slug: categorySlug } });
+    if (!category) return [];
+
+    const categoryIds: number[] = [Number(category.category_id)];
+    
+    // Find Level 2 children
+    const children = await categoryRepo.find({
+      where: { parent_id: category.category_id }
+    });
+    const childrenIds = children.map(c => Number(c.category_id));
+    
+    if (childrenIds.length > 0) {
+      categoryIds.push(...childrenIds);
+      // Find Level 3 grandchildren
+      const grandChildren = await categoryRepo.find({
+        where: { parent_id: In(childrenIds) }
+      });
+      const grandChildrenIds = grandChildren.map(c => Number(c.category_id));
+      if (grandChildrenIds.length > 0) {
+        categoryIds.push(...grandChildrenIds);
+      }
+    }
+    
+    return categoryIds;
+  }
+
+  private async getCategoryIdsWithDescendantsById(categoryId: number): Promise<number[]> {
+    const categoryRepo = this.dataSource.getRepository(Category);
+    const category = await categoryRepo.findOne({ where: { category_id: categoryId } });
+    if (!category) return [];
+
+    const categoryIds: number[] = [Number(category.category_id)];
+    
+    // Find Level 2 children
+    const children = await categoryRepo.find({
+      where: { parent_id: category.category_id }
+    });
+    const childrenIds = children.map(c => Number(c.category_id));
+    
+    if (childrenIds.length > 0) {
+      categoryIds.push(...childrenIds);
+      // Find Level 3 grandchildren
+      const grandChildren = await categoryRepo.find({
+        where: { parent_id: In(childrenIds) }
+      });
+      const grandChildrenIds = grandChildren.map(c => Number(c.category_id));
+      if (grandChildrenIds.length > 0) {
+        categoryIds.push(...grandChildrenIds);
+      }
+    }
+    
+    return categoryIds;
   }
 
 
@@ -286,8 +343,22 @@ export class ProductsService {
 
     // Hỗ trợ lọc nâng cao cho hàng mới về
     if (brandId) qb.andWhere('product.brand_id = :brandId', { brandId: Number(brandId) });
-    if (categoryId) qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
-    if (slug) qb.andWhere('(brand.slug = :slug OR category.slug = :slug)', { slug });
+    if (categoryId) {
+      const categoryIds = await this.getCategoryIdsWithDescendantsById(Number(categoryId));
+      if (categoryIds.length > 0) {
+        qb.andWhere('product.category_id IN (:...categoryIds)', { categoryIds });
+      } else {
+        qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+      }
+    }
+    if (slug) {
+      const categoryIds = await this.getCategoryIdsWithDescendants(slug);
+      if (categoryIds.length > 0) {
+        qb.andWhere('(brand.slug = :slug OR product.category_id IN (:...categoryIds))', { slug, categoryIds });
+      } else {
+        qb.andWhere('(brand.slug = :slug OR category.slug = :slug)', { slug });
+      }
+    }
     if (priceMin) qb.andWhere('product.price >= :priceMin', { priceMin: Number(priceMin) });
     if (priceMax) qb.andWhere('product.price <= :priceMax', { priceMax: Number(priceMax) });
 
@@ -348,11 +419,21 @@ export class ProductsService {
     }
 
     if (categoryId) {
-      qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+      const categoryIds = await this.getCategoryIdsWithDescendantsById(Number(categoryId));
+      if (categoryIds.length > 0) {
+        qb.andWhere('product.category_id IN (:...categoryIds)', { categoryIds });
+      } else {
+        qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+      }
     }
 
     if (slug) {
-      qb.andWhere('(brand.slug = :slug OR category.slug = :slug)', { slug });
+      const categoryIds = await this.getCategoryIdsWithDescendants(slug);
+      if (categoryIds.length > 0) {
+        qb.andWhere('(brand.slug = :slug OR product.category_id IN (:...categoryIds))', { slug, categoryIds });
+      } else {
+        qb.andWhere('(brand.slug = :slug OR category.slug = :slug)', { slug });
+      }
     }
 
     if (tags) {
@@ -400,6 +481,19 @@ export class ProductsService {
   async getProductById(id: number): Promise<Product> {
     const product = await this.productRepo.findOne({
       where: { product_id: id },
+      relations: ['brand', 'category', 'images'],
+      order: {
+        images: { is_thumbnail: 'DESC', image_id: 'ASC' },
+      }
+    });
+
+    if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
+    return product;
+  }
+
+  async getProductBySlug(slug: string): Promise<Product> {
+    const product = await this.productRepo.findOne({
+      where: { slug: slug },
       relations: ['brand', 'category', 'images'],
       order: {
         images: { is_thumbnail: 'DESC', image_id: 'ASC' },
@@ -486,7 +580,12 @@ export class ProductsService {
     }
 
     if (categoryId) {
-      qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+      const categoryIds = await this.getCategoryIdsWithDescendantsById(Number(categoryId));
+      if (categoryIds.length > 0) {
+        qb.andWhere('product.category_id IN (:...categoryIds)', { categoryIds });
+      } else {
+        qb.andWhere('product.category_id = :categoryId', { categoryId: Number(categoryId) });
+      }
     }
 
     if (priceMin) {

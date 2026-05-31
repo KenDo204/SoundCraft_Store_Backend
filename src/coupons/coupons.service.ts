@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Coupon } from './entities/coupon.entity';
 import { DiscountType } from './enums/coupon-discount.enum';
 import { CouponUsage } from './entities/coupon-usage.entity';
@@ -172,8 +173,36 @@ export class CouponsService {
   
   async toggleActive(couponId: number) {
     const coupon = await this.couponRepo.findOne({ where: { coupon_id: couponId } });
-    if (!coupon) throw new NotFoundException();
+    if (!coupon) throw new NotFoundException('Không tìm thấy mã giảm giá.');
+
+    // Nếu chuẩn bị kích hoạt lại coupon
+    if (!coupon.is_active) {
+      const now = new Date();
+      if (now > new Date(coupon.end_date)) {
+        throw new BadRequestException('Mã giảm giá đã hết hạn, không thể kích hoạt lại.');
+      }
+    }
+
     coupon.is_active = !coupon.is_active;
     return await this.couponRepo.save(coupon);
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleAutoDeactivateCoupons() {
+    const now = new Date();
+    const expiredCoupons = await this.couponRepo.find({
+      where: {
+        is_active: true,
+        end_date: LessThan(now),
+      },
+    });
+
+    if (expiredCoupons.length > 0) {
+      for (const coupon of expiredCoupons) {
+        coupon.is_active = false;
+      }
+      await this.couponRepo.save(expiredCoupons);
+      console.log(`[Cron Job] Đã tự động tắt kích hoạt ${expiredCoupons.length} mã giảm giá đã hết hạn.`);
+    }
   }
 }

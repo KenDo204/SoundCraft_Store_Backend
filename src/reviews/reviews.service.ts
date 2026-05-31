@@ -204,9 +204,21 @@ export class ReviewsService {
     const skip = (Number(page) - 1) * Number(limit);
 
     const where: any = {};
-    if (rating) where.rating = Number(rating);
+    if (rating) {
+      const parsedRating = Number(rating);
+      if (isNaN(parsedRating)) {
+        throw new BadRequestException('Đánh giá không hợp lệ');
+      }
+      where.rating = parsedRating;
+    }
     if (status) where.review_status = status;
-    if (product_id) where.product = { product_id: Number(product_id) };
+    if (product_id) {
+      const parsedProductId = Number(product_id);
+      if (isNaN(parsedProductId)) {
+        throw new BadRequestException('Mã sản phẩm không hợp lệ');
+      }
+      where.product = { product_id: parsedProductId };
+    }
 
     const order: any = {};
     if (sort === 'highest_rating') order.rating = 'DESC';
@@ -234,6 +246,10 @@ export class ReviewsService {
   }
 
   async getStatisticsByProduct(productId: number) {
+    if (!productId || isNaN(productId)) {
+      throw new BadRequestException('Mã sản phẩm không hợp lệ');
+    }
+
     const reviews = await this.reviewRepository.find({
       where: { product: { product_id: productId }, review_status: 'PUBLISHED' },
     });

@@ -188,14 +188,17 @@ export class ProductsController {
   }
 
   // =====================================
-  // 4. LẤY CHI TIẾT 1 SẢN PHẨM
+  // 4. LẤY CHI TIẾT 1 SẢN PHẨM (ID HOẶC SLUG)
   // =====================================
-  @Get(':id')
+  @Get(':slug')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Lấy chi tiết 1 sản phẩm theo ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID của sản phẩm' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    const data = await this.productsService.getProductById(id);
+  @ApiOperation({ summary: 'Lấy chi tiết 1 sản phẩm theo ID hoặc Slug' })
+  @ApiParam({ name: 'slug', type: String, description: 'ID hoặc Slug của sản phẩm' })
+  async findOne(@Param('slug') slug: string) {
+    const isId = /^\d+$/.test(slug);
+    const data = isId
+      ? await this.productsService.getProductById(Number(slug))
+      : await this.productsService.getProductBySlug(slug);
     
     return {
       status: 200,
