@@ -1,7 +1,7 @@
 {
   "name": "soundcraft-backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "SoundCraft Store - NestJS RESTful API Backend with VNPay & GHN Integrations",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
